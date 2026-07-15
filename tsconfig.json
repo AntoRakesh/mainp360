@@ -1,0 +1,169 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "shared-ui": ["projects/shared-ui/src/public-api.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./projects/shell/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/shell/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/login/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/login/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/otp/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/otp/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/navbar/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/navbar/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/dashboard/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/dashboard/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/locating/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/locating/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/events/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/events/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/report/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/report/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/process-automation/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/process-automation/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/configuration/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/configuration/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/license/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/license/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/user-management/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/user-management/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/project/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/project/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/people/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/people/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/device/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/device/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/attendance/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/attendance/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/access-control/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/access-control/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/ot-management/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/ot-management/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/visitor-management/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/visitor-management/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/patrol/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/patrol/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/meal-management/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/meal-management/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/evacuation/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/evacuation/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/auth/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/auth/tsconfig.spec.json"
+    }
+  ]
+}

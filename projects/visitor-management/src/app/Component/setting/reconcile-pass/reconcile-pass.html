@@ -1,0 +1,101 @@
+<div class="reconcile-pass-panel">
+  <div class="panel-header">
+    <h3>Reconcile Pass</h3>
+    <button type="button" class="btn-add" (click)="openAdd()">
+      <i class="ti ti-plus"></i> Add Reconcile Pass
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Number Of Visitors</th>
+          <th>Number Of Pepole Exited</th>
+          <th>Number Of Physically Pass</th>
+          <th>Verified Security EmpNo</th>
+          <th>Created At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.numberOfVisitors }}</td>
+          <td>{{ item.numberOfPeopleExited }}</td>
+          <td>{{ item.visitorPhysicallyPresent }}</td>
+          <td>{{ item.verifiedSecurityEmpNo }}</td>
+          <td>{{ item.createdAt ? (item.createdAt | date: 'medium') : '-' }}</td>
+          <td class="actions">
+            <button type="button" class="icon-btn" title="Edit" (click)="openEdit(item)">
+              <i class="ti ti-pencil"></i>
+            </button>
+            <button type="button" class="icon-btn danger" title="Delete" (click)="delete(item.id!)">
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="6" class="no-data">No reconcile pass records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit Reconcile Pass' : 'Add Reconcile Pass' }}</h3>
+        <button type="button" class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="form-group">
+          <label>Number Of Visitors</label>
+          <input type="text" [(ngModel)]="form.numberOfVisitors" name="numberOfVisitors" placeholder="Number of visitors">
+        </div>
+        <div class="form-group">
+          <label>Number Of Pepole Exited</label>
+          <input type="text" [(ngModel)]="form.numberOfPeopleExited" name="numberOfPeopleExited" placeholder="Number of people exited">
+        </div>
+        <div class="form-group">
+          <label>Number Of Physically Pass</label>
+          <input type="text" [(ngModel)]="form.visitorPhysicallyPresent" name="visitorPhysicallyPresent" placeholder="Number physically present">
+        </div>
+        <div class="form-group">
+          <label>Verified Security EmpNo</label>
+          <input type="text" [(ngModel)]="form.verifiedSecurityEmpNo" name="verifiedSecurityEmpNo" placeholder="Verified security employee number">
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? (isEdit ? 'Saving...' : 'Creating...') : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Delete this reconcile pass record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+</div>

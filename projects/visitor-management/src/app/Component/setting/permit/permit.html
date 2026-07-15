@@ -1,0 +1,93 @@
+<div class="permit-panel">
+  <div class="panel-header">
+    <h3>Client Permit</h3>
+    <button type="button" class="btn-add" (click)="openAdd()">
+      <i class="ti ti-plus"></i> Add Permit
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <ng-container *ngIf="!loading">
+    <div class="summary-card" *ngIf="item; else noPermitData">
+      <div class="summary-grid">
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" [(ngModel)]="form.clientName" name="clientName" placeholder="Client name">
+        </div>
+        <div class="form-group">
+          <label>Client Email</label>
+          <input type="text" [(ngModel)]="form.clientEmail" name="clientEmail" placeholder="Client email">
+        </div>
+        <div class="form-group">
+          <label>Support Contact No</label>
+          <input type="text" [(ngModel)]="form.supportContactNo" name="supportContactNo" placeholder="Support contact no">
+        </div>
+        <div class="form-group">
+          <label>Security Contact No</label>
+          <input type="text" [(ngModel)]="form.securityContactNo" name="securityContactNo" placeholder="Security contact no">
+        </div>
+        <div class="form-group">
+          <label>Fire Contact No</label>
+          <input type="text" [(ngModel)]="form.fireContactNo" name="fireContactNo" placeholder="Fire contact no">
+        </div>
+      </div>
+
+      <div class="summary-actions">
+        <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+        <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" text="Saving"></lib-popup-loader>
+    </div>
+
+    <ng-template #noPermitData>
+      <div class="tab-placeholder">
+        <p>No permit details found.</p>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <div class="popup-overlay" *ngIf="showAddPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Add Client Permit</h3>
+        <button type="button" class="popup-close" (click)="closeAdd()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" [(ngModel)]="addForm.clientName" name="addClientName" placeholder="Client name">
+        </div>
+        <div class="form-group">
+          <label>Client Email</label>
+          <input type="text" [(ngModel)]="addForm.clientEmail" name="addClientEmail" placeholder="Client email">
+        </div>
+        <div class="form-group">
+          <label>Support Contact No</label>
+          <input type="text" [(ngModel)]="addForm.supportContactNo" name="addSupportContactNo" placeholder="Support contact no">
+        </div>
+        <div class="form-group">
+          <label>Security Contact No</label>
+          <input type="text" [(ngModel)]="addForm.securityContactNo" name="addSecurityContactNo" placeholder="Security contact no">
+        </div>
+        <div class="form-group">
+          <label>Fire Contact No</label>
+          <input type="text" [(ngModel)]="addForm.fireContactNo" name="addFireContactNo" placeholder="Fire contact no">
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="closeAdd()">Cancel</button>
+        <button type="button" class="btn-save" (click)="addSave()" [disabled]="addSaving">
+          {{ addSaving ? 'Creating...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="addSaving" text="Creating"></lib-popup-loader>
+    </div>
+  </div>
+</div>

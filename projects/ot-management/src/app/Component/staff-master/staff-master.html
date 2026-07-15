@@ -1,0 +1,152 @@
+<div class="staff-master-container">
+  <!-- Top row -->
+  <div class="top-row">
+    <h2>Staff Master</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" title="Add" (click)="openAdd()">
+        <img [src]="otManagementUrl + '/assets/icons/add.png'" alt="add">
+      </button>
+      <button class="icon-btn" title="Reload" (click)="loadStaffs()">
+        <img [src]="otManagementUrl + '/assets/icons/reload.png'" alt="reload">
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Staff ID</th>
+          <th>Staff Name</th>
+          <th>Role</th>
+          <th>Department</th>
+          <th>Contact Number</th>
+          <th>Shift</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let st of filteredStaffs; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ st.staffId }}</td>
+          <td>{{ st.staffName }}</td>
+          <td>{{ st.role }}</td>
+          <td>{{ st.department }}</td>
+          <td>{{ st.contactNumber }}</td>
+          <td>{{ st.shift }}</td>
+          <td><span class="badge" [class.active]="st.status">{{ st.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(st)">
+              <img [src]="otManagementUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(st.id!)">
+              <img [src]="otManagementUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredStaffs.length === 0">
+          <td colspan="9" class="no-data">No staff found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit' : 'Add' }} Staff</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Staff ID</label>
+            <input type="text" [(ngModel)]="form.staffId" [disabled]="isEdit" placeholder="Enter staff ID">
+          </div>
+          <div class="form-group">
+            <label>Staff Name</label>
+            <input type="text" [(ngModel)]="form.staffName" placeholder="Enter staff name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role</label>
+            <input type="text" [(ngModel)]="form.role" placeholder="Enter role">
+          </div>
+          <div class="form-group">
+            <label>Department</label>
+            <input type="text" [(ngModel)]="form.department" placeholder="Enter department">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tag ID</label>
+            <input type="text" [(ngModel)]="form.tagId" placeholder="Enter tag ID">
+          </div>
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" [(ngModel)]="form.contactNumber" placeholder="Enter contact number">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Shift</label>
+          <input type="text" [(ngModel)]="form.shift" placeholder="Enter shift">
+        </div>
+
+        <div class="toggle-row">
+          <span class="toggle-label">Status</span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="form.status">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-state">{{ form.status ? 'Active' : 'Inactive' }}</span>
+        </div>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

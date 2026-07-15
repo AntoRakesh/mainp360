@@ -1,0 +1,373 @@
+<div class="app-shell">
+
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <img [src]="authUrl + '/assets/icons/PurpleIQLOGOPurpleBright.png'" alt="Purple IQ">
+      </div>
+      <span class="logo-text">Purple IQ</span>
+    </div>
+
+    <!-- <nav class="nav-section">
+      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/dashboardpurple.png'" alt="dashboard">
+        </div>
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <a class="nav-item" routerLink="/locating" routerLinkActive="active">
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/trackingpurple.png'" alt="locating">
+        </div>
+        <span class="nav-text">Locating</span>
+      </a>
+
+      <a class="nav-item" routerLink="/events" routerLinkActive="active">
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Events-purple.png'" alt="events">
+        </div>
+        <span class="nav-text">Events</span>
+      </a>
+
+      <a class="nav-item" routerLink="/report" routerLinkActive="active">
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/reports-purple.png'" alt="report">
+        </div>
+        <span class="nav-text">Report</span>
+      </a>
+
+      <a class="nav-item" routerLink="/process-automation" routerLinkActive="active">
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Process%26auto-purple.png'" alt="process">
+        </div>
+        <span class="nav-text">Process & Automation</span>
+      </a>
+
+      <div class="nav-item" (click)="toggleAdmin()">
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Administration-purple.png'" alt="administration">
+        </div>
+        <span class="nav-text">Administration</span>
+        <i class="ti ti-chevron-right nav-arrow" [class.open]="adminOpen"></i>
+      </div>
+    </nav> -->
+
+
+    <nav class="nav-section">
+      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active-item" title="Dashboard">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/dashboardpurple.png'" alt="dashboard" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/dashboardwhite.png'" alt="dashboard" class="icon-active">
+        </div>
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <a class="nav-item" routerLink="/locating" routerLinkActive="active-item" title="Locating">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/trackingpurple.png'" alt="locating" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/trackingwhite.png'" alt="locating" class="icon-active">
+        </div>
+        <span class="nav-text">Locating</span>
+      </a>
+
+      <a class="nav-item" routerLink="/events" routerLinkActive="active-item" title="Events">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Events-purple.png'" alt="events" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/Events-white.png'" alt="events" class="icon-active">
+        </div>
+        <span class="nav-text">Events</span>
+      </a>
+
+      <a class="nav-item" routerLink="/report" routerLinkActive="active-item" title="Report">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/reports-purple.png'" alt="report" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/reports-white.png'" alt="report" class="icon-active">
+        </div>
+        <span class="nav-text">Report</span>
+      </a>
+
+      <a class="nav-item" routerLink="/process-automation" routerLinkActive="active-item" title="Process & Automation">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Process%26auto-purple.png'" alt="process" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/process%26auto-white.png'" alt="process" class="icon-active">
+        </div>
+        <span class="nav-text">Process & Automation</span>
+      </a>
+
+      <!-- <div class="nav-item" [class.active-item]="adminOpen" (click)="toggleAdmin()" title="Administration">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Administration-purple.png'" alt="administration" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/Administration-white.png'" alt="administration" class="icon-active">
+        </div>
+        <span class="nav-text">Administration</span>
+        <i class="ti ti-chevron-right nav-arrow" [class.open]="adminOpen"></i>
+      </div> -->
+      <div class="nav-item" [class.active-item]="adminOpen || isAdminRoute()" (click)="toggleAdmin()">
+        <div class="nav-indicator"></div>
+        <div class="nav-icon">
+          <img [src]="authUrl + '/assets/icons/Administration-purple.png'" alt="administration" class="icon-default">
+          <img [src]="authUrl + '/assets/icons/Administration-white.png'" alt="administration" class="icon-active">
+        </div>
+        <span class="nav-text">Administration</span>
+        <i class="ti ti-chevron-right nav-arrow" [class.open]="adminOpen"></i>
+      </div>
+      
+    </nav>
+
+
+    <div class="sidebar-footer">
+      <div class="footer-toggle" (click)="toggleSidebar()">
+        <img [src]="authUrl + '/assets/icons/down.png'" alt="toggle" class="toggle-icon"
+          [class.rotated]="sidebarCollapsed">
+      </div>
+    </div>
+  </aside>
+
+
+
+
+
+
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-brand">People360</span>
+      <div class="topbar-actions">
+        <button class="action-btn">
+          <img [src]="authUrl + '/assets/icons/notification.png'" alt="notifications" class="action-icon">
+        </button>
+        <button class="action-btn">
+          <img [src]="authUrl + '/assets/icons/email.png'" alt="email" class="action-icon">
+        </button>
+        <div class="avatar">AD</div>
+      </div>
+    </header>
+
+    <app-breadcrumb (openAdminPanel)="handleBreadcrumbPanel($event)"></app-breadcrumb>
+
+
+
+
+    <div class="content-area">
+      <main class="content">
+
+        <!-- sub-panel inside main content -->
+        <div class="sub-panel" [class.open]="adminOpen">
+          <div class="sub-panel-header">
+            <span>Administration</span>
+            <button class="sub-close" (click)="toggleAdmin()">
+              <i class="ti ti-x"></i>
+            </button>
+          </div>
+          <nav class="sub-nav">
+
+            <div class="sub-item" [class.active]="configOpen" (click)="toggleConfig()">
+              <i class="ti ti-adjustments-horizontal"></i>
+              <span>Configuration</span>
+              <i class="ti ti-chevron-down sub-arrow" [class.open]="configOpen"></i>
+            </div>
+
+            <!-- Configuration tree -->
+            <div class="tree" [class.open]="configOpen">
+              <div class="tree-line"></div>
+              <div class="tree-items">
+                <a class="tree-item" routerLink="/administration/configuration/project" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Projects</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/configuration/device" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Devices</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/configuration/people" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>People</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/configuration/attendance" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Attendance</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/configuration/access-control" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Access Control</span>
+                </a>
+                <!-- <a class="tree-item" routerLink="/administration/configuration/ot-management" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>OT Management</span>
+                </a> -->
+
+                <!-- OT Management -->
+<div class="tree-item-parent" [class.active]="otOpen" (click)="toggleOt(); $event.stopPropagation()">
+  <div class="tree-dash"></div>
+  <span>OT Management</span>
+  <i class="ti ti-chevron-down sub-arrow" [class.open]="otOpen" style="margin-left:auto;font-size:12px"></i>
+</div>
+
+<div class="tree" [class.open]="otOpen">
+  <div class="tree-line"></div>
+  <div class="tree-items">
+    <a class="tree-item" routerLink="/administration/configuration/ot-management/ot-master" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>OT Master</span>
+    </a>
+    <a class="tree-item" routerLink="/administration/configuration/ot-management/staff-master" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>Staff Master</span>
+    </a>
+    <a class="tree-item" routerLink="/administration/configuration/ot-management/patient-master" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>Patient Master</span>
+    </a>
+    <a class="tree-item" routerLink="/administration/configuration/ot-management/equipment-master" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>Equipment Master</span>
+    </a>
+    <a class="tree-item" routerLink="/administration/configuration/ot-management/ot-scheduling" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>OT Scheduling</span>
+    </a>
+  </div>
+</div>
+                <!-- Visitor Management -->
+<div class="tree-item-parent" [class.active]="visitorOpen" (click)="toggleVisitor(); $event.stopPropagation()">
+  <div class="tree-dash"></div>
+  <span>Visitor Management</span>
+  <i class="ti ti-chevron-down sub-arrow" [class.open]="visitorOpen" style="margin-left:auto;font-size:12px"></i>
+</div>
+
+<div class="tree" [class.open]="visitorOpen">
+  <div class="tree-line"></div>
+  <div class="tree-items">
+    <a class="tree-item" routerLink="/administration/configuration/visitor-management/manage" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>Manage</span>
+    </a>
+    <a class="tree-item" routerLink="/administration/configuration/visitor-management/safety-permit" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>Safety Permit</span>
+    </a>
+    <a class="tree-item" routerLink="/administration/configuration/visitor-management/setting" routerLinkActive="active" (click)="adminOpen=false">
+      <div class="tree-dash"></div>
+      <span>Setting</span>
+    </a>
+  </div>
+</div>
+                <a class="tree-item" routerLink="/administration/configuration/patrol" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Patrol</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/configuration/meal-management"
+                  routerLinkActive="active" (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Meal Management</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/configuration/evacuation" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Evacuation</span>
+                </a>
+              </div>
+            </div>
+
+            <a class="sub-item" routerLink="/administration/license" routerLinkActive="active"
+              (click)="adminOpen=false">
+              <i class="ti ti-license"></i>
+              <span>License</span>
+            </a>
+
+            <!-- <a class="sub-item" routerLink="/administration/user-management" routerLinkActive="active"
+              (click)="adminOpen=false">
+              <i class="ti ti-user-cog"></i>
+              <span>User management</span>
+            </a> -->
+            <div class="sub-item" [class.active]="userMgmtOpen" (click)="toggleUserMgmt()">
+              <i class="ti ti-user-cog"></i>
+              <span>User management</span>
+              <i class="ti ti-chevron-down sub-arrow" [class.open]="userMgmtOpen"></i>
+            </div>
+
+            <div class="tree" [class.open]="userMgmtOpen">
+              <div class="tree-line"></div>
+              <div class="tree-items">
+                <a class="tree-item" routerLink="/administration/user-management/user" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>User</span>
+                </a>
+                <a class="tree-item" routerLink="/administration/user-management/role" routerLinkActive="active"
+                  (click)="adminOpen=false">
+                  <div class="tree-dash"></div>
+                  <span>Role</span>
+                </a>
+              </div>
+            </div>
+
+
+
+          </nav>
+
+
+        </div>
+
+        <router-outlet></router-outlet>
+
+      </main>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <nav class="mobile-bar">
+      <a class="mob-item" routerLink="/dashboard" routerLinkActive="active">
+        <i class="ti ti-layout-dashboard"></i>
+        <span>Home</span>
+      </a>
+      <a class="mob-item" routerLink="/locating" routerLinkActive="active">
+        <i class="ti ti-map-pin"></i>
+        <span>Locate</span>
+      </a>
+      <a class="mob-item" routerLink="/events" routerLinkActive="active">
+        <i class="ti ti-calendar-event"></i>
+        <span>Events</span>
+      </a>
+      <a class="mob-item" routerLink="/report" routerLinkActive="active">
+        <i class="ti ti-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a class="mob-item" routerLink="/administration" routerLinkActive="active">
+        <i class="ti ti-building"></i>
+        <span>Admin</span>
+      </a>
+    </nav>
+  </div>
+
+  <app-ai-assistant></app-ai-assistant>
+
+</div>

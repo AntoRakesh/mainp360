@@ -1,0 +1,95 @@
+<div class="role-container">
+  <div class="role-header">
+    <h2>Roles</h2>
+    <div class="header-actions">
+      <button class="icon-btn" title="Add Role" (click)="openAdd()">
+        <img [src]="userMgmtUrl + '/assets/icons/add.png'" alt="add">
+      </button>
+      <button class="icon-btn" title="Reload" (click)="loadRoles()">
+        <img [src]="userMgmtUrl + '/assets/icons/reload.png'" alt="reload">
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="role-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Role Name</th>
+          <th>Description</th>
+          <th>Permissions</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ role.roleName }}</td>
+          <td>{{ role.description }}</td>
+         <td>{{ role.assignedPermissions.length || 0 }}</td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(role)">
+              <img [src]="userMgmtUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small" title="Delete" (click)="deleteRole(role.id!)">
+              <img [src]="userMgmtUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="roles.length === 0">
+          <td colspan="5" class="no-data">No roles found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- <div class="popup-overlay" *ngIf="showPopup" (click)="closePopup()">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit Role' : 'Add Role' }}</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role Name</label>
+            <input type="text" [(ngModel)]="roleForm.roleName" placeholder="Enter role name">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" [(ngModel)]="roleForm.description" placeholder="Enter description">
+          </div>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div> -->
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

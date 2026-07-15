@@ -1,0 +1,49 @@
+<div class="ai-assistant">
+  <div class="ai-panel" *ngIf="open">
+    <div class="ai-panel-header">
+      <div class="ai-title">
+        <i class="ti ti-robot"></i>
+        <span>AI Assistant</span>
+      </div>
+      <button type="button" class="ai-close" (click)="close()">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+
+    <div class="ai-messages">
+      <div *ngFor="let m of messages" class="ai-message" [class.user]="m.role === 'user'">
+        <div class="ai-bubble">{{ m.text }}</div>
+      </div>
+      <div class="ai-message" *ngIf="busy">
+        <div class="ai-bubble ai-typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div #messagesEnd></div>
+    </div>
+
+    <div class="ai-input-row">
+      <button
+        type="button"
+        class="ai-mic-btn"
+        *ngIf="micSupported"
+        [class.active]="listening"
+        title="Speak"
+        (click)="toggleMic()">
+        <i class="ti" [class.ti-microphone]="!listening" [class.ti-microphone-2]="listening"></i>
+      </button>
+      <input
+        type="text"
+        placeholder="Ask me anything..."
+        [(ngModel)]="inputText"
+        (keydown.enter)="send()">
+      <button type="button" class="ai-send-btn" [disabled]="!inputText.trim() || busy" (click)="send()">
+        <i class="ti ti-send"></i>
+      </button>
+    </div>
+  </div>
+
+  <button type="button" class="ai-fab" [class.open]="open" title="AI Assistant" (click)="toggle()">
+    <i class="ti" [class.ti-robot]="!open" [class.ti-x]="open"></i>
+  </button>
+</div>

@@ -1,0 +1,34 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.crumb-link {
+  color: #7030a0;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.crumb-current {
+  color: #666;
+  font-weight: 500;
+}
+
+.crumb-separator {
+  font-size: 14px;
+  color: #999;
+  display: flex;
+  align-items: center;
+}

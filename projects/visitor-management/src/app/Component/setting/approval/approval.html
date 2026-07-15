@@ -1,0 +1,114 @@
+<div class="approval-panel">
+  <div class="panel-header">
+    <h3>Approval Rules</h3>
+    <button type="button" class="btn-add" (click)="openAdd()">
+      <i class="ti ti-plus"></i> Add Approval
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Precedence No</th>
+          <th>Permit Type</th>
+          <th>Employee Emails</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of approvals; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ item.precedence }}</td>
+          <td>{{ item.permitType }}</td>
+          <td>{{ item.employeeEmailIds.join(', ') }}</td>
+          <td class="actions">
+            <button type="button" class="icon-btn" title="Edit" (click)="openEdit(item)">
+              <i class="ti ti-pencil"></i>
+            </button>
+            <button type="button" class="icon-btn danger" title="Delete" (click)="delete(item.id!)">
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="approvals.length === 0">
+          <td colspan="5" class="no-data">No approval rules found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit Approval' : 'Add Approval' }}</h3>
+        <button type="button" class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="form-group">
+          <label>Precedence No</label>
+          <select [(ngModel)]="form.precedence" name="precedence">
+            <option value="" disabled>Select precedence no</option>
+            <option *ngFor="let option of precedenceOptions" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Permit Type</label>
+          <select [(ngModel)]="form.permitType" name="permitType">
+            <option value="" disabled>Select permit type</option>
+            <option *ngFor="let option of permitTypeOptions" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Employee Emails</label>
+          <div class="email-input-wrapper">
+            <span class="email-chip" *ngFor="let email of form.employeeEmailIds; let i = index">
+              {{ email }}
+              <button type="button" class="chip-remove" (click)="removeEmail(i)">✕</button>
+            </span>
+            <input
+              type="text"
+              [(ngModel)]="emailInput"
+              name="emailInput"
+              placeholder="Type email, press Enter or ,"
+              (keydown)="onEmailKeydown($event)"
+              (blur)="commitEmailInput()">
+          </div>
+          <p class="hint">Press Enter or type a comma to add an email.</p>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? (isEdit ? 'Saving...' : 'Creating...') : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Delete this approval rule? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+</div>

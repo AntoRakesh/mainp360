@@ -1,0 +1,228 @@
+<div class="page-container">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h2>Locating</h2>
+  </div>
+
+  <!-- Split layout -->
+  <div class="split-layout">
+
+    <!-- Left: Tree (30%) -->
+    <div class="tree-panel">
+      <div class="tree-container">
+
+        <div class="tree-node" *ngFor="let project of projects">
+          <div class="node-row level-0" [class.selected]="expandedProject === project.id && !expandedCountry" (click)="toggleProject(project.id!)">
+            <div class="node-left">
+              <i class="ti" [class.ti-chevron-right]="expandedProject !== project.id"
+                [class.ti-chevron-down]="expandedProject === project.id"></i>
+              <i class="ti ti-folder"></i>
+              <span>{{ project.projectName }}</span>
+            </div>
+          </div>
+
+          <!-- Countries -->
+          <div class="tree-children" *ngIf="expandedProject === project.id">
+            <div class="tree-node" *ngFor="let country of getCountries(project.id!)">
+              <div class="node-row level-1" [class.selected]="expandedCountry === country.id && !expandedArea"
+                (click)="toggleCountry(country.id!, country.latitude, country.longitude, country.countryName)">
+                <div class="node-left">
+                  <i class="ti" [class.ti-chevron-right]="expandedCountry !== country.id"
+                    [class.ti-chevron-down]="expandedCountry === country.id"></i>
+                  <i class="ti ti-flag"></i>
+                  <span>{{ country.countryName }}</span>
+                </div>
+              </div>
+
+              <!-- Areas -->
+              <div class="tree-children" *ngIf="expandedCountry === country.id">
+                <div class="tree-node" *ngFor="let area of getAreas(country.id!)">
+                  <div class="node-row level-2" [class.selected]="expandedArea === area.id && !expandedBuilding" (click)="toggleArea(area.id!, area.latitude, area.longitude, area.areaName)">
+                    <div class="node-left">
+                      <i class="ti" [class.ti-chevron-right]="expandedArea !== area.id"
+                        [class.ti-chevron-down]="expandedArea === area.id"></i>
+                      <i class="ti ti-map"></i>
+                      <span>{{ area.areaName }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Buildings -->
+                  <div class="tree-children" *ngIf="expandedArea === area.id">
+                    <div class="tree-node" *ngFor="let building of getBuildings(area.id!)">
+                      <div class="node-row level-3" [class.selected]="expandedBuilding === building.id && !expandedFloor"
+                        (click)="toggleBuilding(building.id!, building.latitude, building.longitude, building.buildingName)">
+                        <div class="node-left">
+                          <i class="ti" [class.ti-chevron-right]="expandedBuilding !== building.id"
+                            [class.ti-chevron-down]="expandedBuilding === building.id"></i>
+                          <i class="ti ti-building"></i>
+                          <span>{{ building.buildingName }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Floors -->
+                      <div class="tree-children" *ngIf="expandedBuilding === building.id">
+                        <div class="tree-node" *ngFor="let floor of getFloors(building.id!)">
+                          <div class="node-row level-4" [class.selected]="expandedFloor === floor.id && !expandedZone" (click)="toggleFloor(floor.id!)">
+                            <div class="node-left">
+                              <i class="ti" [class.ti-chevron-right]="expandedFloor !== floor.id"
+                                [class.ti-chevron-down]="expandedFloor === floor.id"></i>
+                              <i class="ti ti-stairs"></i>
+                              <span>{{ floor.floorName }}</span>
+                            </div>
+                          </div>
+
+                          <!-- Zones -->
+                          <div class="tree-children" *ngIf="expandedFloor === floor.id">
+                            <div class="tree-node" *ngFor="let zone of getZones(floor.id!)">
+                              <div class="node-row level-5" [class.selected]="expandedZone === zone.id && !expandedSubZone" (click)="toggleZone(zone.id!)">
+                                <div class="node-left">
+                                  <i class="ti" [class.ti-chevron-right]="expandedZone !== zone.id"
+                                    [class.ti-chevron-down]="expandedZone === zone.id"></i>
+                                  <i class="ti ti-border-all"></i>
+                                  <span>{{ zone.zoneName }}</span>
+                                </div>
+                              </div>
+
+                              <!-- SubZones -->
+                              <div class="tree-children" *ngIf="expandedZone === zone.id">
+                                <div class="tree-node" *ngFor="let sub of getSubZones(zone.id!)">
+                                  <div class="node-row level-6" [class.selected]="expandedSubZone === sub.id"
+                                    (click)="toggleSubZone(sub.id!)">
+                                    <div class="node-left">
+                                      <i class="ti ti-point"></i>
+                                      <span>{{ sub.subZoneName }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="projects.length === 0">No projects found.</div>
+      </div>
+    </div>
+
+    <!-- Right: Map (70%) -->
+    <div class="map-column">
+
+      <!-- Select device (auto-loads "Fixed Device" items on focus) → select
+           parameter (placeholder, reserved for future use) → arms device
+           plotting. Only zones/subzones support device placement, so this
+           toolbar is hidden for every other hierarchy level and the
+           map/image below takes up the full column. -->
+      <div class="locating-toolbar" *ngIf="showZoneTools">
+        <div class="toolbar-field" *ngIf="polygonExists">
+          <label>Select Device</label>
+          <select (focus)="onSelectDeviceFieldFocus()"
+            [ngModel]="selectedDeviceTypeItem" (ngModelChange)="onDeviceTypeItemChange($event)">
+            <option [ngValue]="null">
+              {{ loadingDeviceTypeItems ? 'Loading...' : 'Select Device' }}
+            </option>
+            <option *ngFor="let item of deviceTypeItems" [ngValue]="item" [disabled]="isDeviceAlreadyPlaced(item)">
+              {{ item.mydeviceName }} ({{ item.modelId }}){{ isDeviceAlreadyPlaced(item) ? ' — already plotted' : '' }}
+            </option>
+          </select>
+        </div>
+        <div class="toolbar-field">
+          <label>Select Parameter</label>
+          <select [ngModel]="selectedParameter" (ngModelChange)="selectedParameter = $event">
+            <option [ngValue]="null">Select Parameter</option>
+            <option *ngFor="let p of parameterOptions" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+      </div>
+
+    <div class="map-panel" [class.fullscreen]="isMapFullscreen">
+
+      <div class="map-control-stack" *ngIf="activeMap">
+        <!-- Zoom / expand (geo map or zone canvas, whichever is showing) -->
+        <div class="map-control-group">
+          <button type="button" class="map-ctrl-btn" (click)="zoomIn()" title="Zoom in">
+            <i class="ti ti-plus"></i>
+          </button>
+          <button type="button" class="map-ctrl-btn" (click)="zoomOut()" title="Zoom out">
+            <i class="ti ti-minus"></i>
+          </button>
+          <button type="button" class="map-ctrl-btn" (click)="toggleFullscreen()"
+            [title]="isMapFullscreen ? 'Minimize' : 'Expand'">
+            <i class="ti" [class.ti-maximize]="!isMapFullscreen" [class.ti-minimize]="isMapFullscreen"></i>
+          </button>
+        </div>
+
+        <!-- Draw / edit the zone-mapping polygon (zone & subzone only) -->
+        <div class="map-control-group" *ngIf="showZoneTools">
+          <button type="button" class="map-ctrl-btn" [class.disabled]="polygonExists"
+            (click)="toggleDrawPolygon()" title="Draw zone polygon">
+            <img [src]="locatingUrl + '/assets/icons/polygon.png'" alt="Draw polygon">
+          </button>
+          <button type="button" class="map-ctrl-btn" [class.active]="drawMode === 'edit'"
+            [class.disabled]="!polygonExists" (click)="toggleEditPolygon()" title="Edit zone polygon">
+            <img [src]="locatingUrl + (drawMode === 'edit' ? '/assets/icons/edit-white.png' : '/assets/icons/edit.png')" alt="Edit polygon">
+          </button>
+        </div>
+
+        <!-- Place / delete devices inside the drawn polygon —
+             the device to place is chosen via the "Select Device"
+             toolbar above the map, this icon just arms it. -->
+        <div class="map-control-group" *ngIf="showZoneTools">
+          <button type="button" class="map-ctrl-btn" [class.active]="drawMode === 'place-device'"
+            [class.disabled]="!polygonExists || !selectedDeviceForPlacement" (click)="togglePlaceDeviceMode()"
+            title="Place device">
+            <img [src]="locatingUrl + (drawMode === 'place-device' ? '/assets/icons/device-white.png' : '/assets/icons/device.png')" alt="Place device">
+          </button>
+          <button type="button" class="map-ctrl-btn" [class.active]="drawMode === 'delete-device'"
+            [class.disabled]="!hasDeviceMarkers" (click)="toggleDeleteDeviceMode()" title="Delete device">
+            <img [src]="locatingUrl + (drawMode === 'delete-device' ? '/assets/icons/delete-white.png' : '/assets/icons/delete.png')" alt="Delete device">
+          </button>
+        </div>
+      </div>
+
+      <!-- Explicit finish action: leaflet-draw's "click the first point to
+           close the shape" has a long-standing upstream bug, so this button
+           gives a reliable way to complete the polygon (same effect as
+           double-clicking the last point). -->
+      <div class="finish-draw-hint" *ngIf="drawMode === 'draw' || drawMode === 'edit'">
+        <span>Click each corner of the zone</span>
+        <button type="button" class="finish-draw-btn" [disabled]="!canFinishDrawing" (click)="finishDrawingPolygon()">
+          <i class="ti ti-check"></i> Finish drawing
+        </button>
+      </div>
+
+      <!-- Hover-to-reveal close button, only in fullscreen -->
+      <ng-container *ngIf="isMapFullscreen">
+        <div class="map-top-hover-zone"></div>
+        <button type="button" class="map-close-btn" (click)="toggleFullscreen()" title="Minimize">
+          <i class="ti ti-x"></i>
+          <span>Close</span>
+        </button>
+      </ng-container>
+
+      <div id="locating-map" [hidden]="showImage"></div>
+
+      <div class="map-image-view" *ngIf="showImage">
+        <!-- Zone / subzone: interactive canvas for drawing + device placement -->
+        <div id="zone-image-map" *ngIf="showZoneTools && currentImage"></div>
+
+        <!-- Floor: read-only overview of every zone/subzone polygon and device plotted under it -->
+        <div id="floor-image-map" *ngIf="showFloorOverview && currentImage"></div>
+
+        <div class="no-image" *ngIf="!currentImage">No image available</div>
+      </div>
+    </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,110 @@
+<div class="report-container">
+  <!-- Top row -->
+  <div class="top-row">
+    <h2>Reports</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" title="Add" (click)="openAdd()">
+        <img [src]="reportUrl + '/assets/icons/add.png'" alt="add">
+      </button>
+      <button class="icon-btn" title="Download" (click)="download()">
+        <img [src]="reportUrl + '/assets/icons/download.png'" alt="download">
+      </button>
+      <button class="icon-btn" title="Reload" (click)="reload()">
+        <img [src]="reportUrl + '/assets/icons/reload.png'" alt="reload">
+      </button>
+      <button class="icon-btn" title="Columns" (click)="toggleColumnPicker()">
+        <img [src]="reportUrl + '/assets/icons/columns.png'" alt="columns">
+      </button>
+    </div>
+  </div>
+
+  <!-- Column picker popup -->
+  <div class="popup-overlay" *ngIf="showColumnPicker">
+    <div class="popup column-picker" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Show / Hide Columns</h3>
+        <button class="popup-close" (click)="closeColumnPicker()">&times;</button>
+      </div>
+      <div class="popup-body">
+        <label class="column-option" *ngFor="let col of draftColumns">
+          <input type="checkbox" [(ngModel)]="col.visible">
+          <span>{{ col.label }}</span>
+        </label>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="resetColumns()">Reset</button>
+        <button class="btn-save" (click)="saveColumns()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this report? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th *ngIf="isColumnVisible('slNo')">Sl No</th>
+          <th *ngIf="isColumnVisible('reportName')">Reports</th>
+          <th *ngIf="isColumnVisible('timeRange')">Time Range</th>
+          <th *ngIf="isColumnVisible('expireOn')">Expire On</th>
+          <th *ngIf="isColumnVisible('recurrence')">Recurrence</th>
+          <th *ngIf="isColumnVisible('createdOn')">Created On</th>
+          <th *ngIf="isColumnVisible('type')">Type</th>
+          <th *ngIf="isColumnVisible('shareWith')">Share With</th>
+          <th *ngIf="isColumnVisible('generatedOn')">Generated On</th>
+          <th *ngIf="isColumnVisible('status')">Status</th>
+          <th *ngIf="isColumnVisible('actions')">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of filteredReports; let i = index">
+          <td *ngIf="isColumnVisible('slNo')">{{ i + 1 }}</td>
+          <td *ngIf="isColumnVisible('reportName')">{{ report.reportName }}</td>
+          <td *ngIf="isColumnVisible('timeRange')">{{ report.timeRange }}</td>
+          <td *ngIf="isColumnVisible('expireOn')">{{ report.expireOn }}</td>
+          <td *ngIf="isColumnVisible('recurrence')">{{ report.recurrence }}</td>
+          <td *ngIf="isColumnVisible('createdOn')">{{ report.createdOn }}</td>
+          <td *ngIf="isColumnVisible('type')">{{ report.type }}</td>
+          <td *ngIf="isColumnVisible('shareWith')">{{ report.shareWith }}</td>
+          <td *ngIf="isColumnVisible('generatedOn')">{{ report.generatedOn }}</td>
+          <td *ngIf="isColumnVisible('status')">
+            <span class="status-pill" [class.active]="report.status === 'Active'" [class.expired]="report.status === 'Expired'">
+              {{ report.status }}
+            </span>
+          </td>
+          <td class="actions" *ngIf="isColumnVisible('actions')">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(report.id)">
+              <img [src]="reportUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(report.id)">
+              <img [src]="reportUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredReports.length === 0">
+          <td [attr.colspan]="visibleColumnCount" class="no-data">No reports found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+<div class="entry-exit-panel">
+  <div class="panel-header">
+    <h3>Entry/Exit</h3>
+    <button type="button" class="btn-add" (click)="openAdd()">
+      <i class="ti ti-plus"></i> Add Entry/Exit
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Entry Exit Name</th>
+          <th>Entry Exit Description</th>
+          <th>Entry Exit Type</th>
+          <th>Created At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.type }}</td>
+          <td>{{ item.createdAt ? (item.createdAt | date: 'medium') : '-' }}</td>
+          <td class="actions">
+            <button type="button" class="icon-btn" title="Edit" (click)="openEdit(item)">
+              <i class="ti ti-pencil"></i>
+            </button>
+            <button type="button" class="icon-btn danger" title="Delete" (click)="delete(item.id!)">
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="6" class="no-data">No entry/exit records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit Entry/Exit' : 'Add Entry/Exit' }}</h3>
+        <button type="button" class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="form-group">
+          <label>Entry Exit Name</label>
+          <input type="text" [(ngModel)]="form.name" name="name" placeholder="Entry exit name">
+        </div>
+        <div class="form-group">
+          <label>Entry Exit Type</label>
+          <input type="text" [(ngModel)]="form.type" name="type" placeholder="Entry exit type">
+        </div>
+        <div class="form-group">
+          <label>Entry Exit Description</label>
+          <input type="text" [(ngModel)]="form.description" name="description" placeholder="Entry exit description">
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? (isEdit ? 'Saving...' : 'Creating...') : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Delete this entry/exit record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+</div>

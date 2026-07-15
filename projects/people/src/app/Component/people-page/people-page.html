@@ -1,0 +1,595 @@
+<div class="people-container">
+  <!-- Header -->
+  <div class="top-row">
+    <h2>{{ activeTab | titlecase }}</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab === 'employees'" (click)="setTab('employees')">
+        Employees
+      </button>
+      <button class="tab" [class.active]="activeTab === 'contractors'" (click)="setTab('contractors')">
+        Contractors
+      </button>
+      <button class="tab" [class.active]="activeTab === 'visitors'" (click)="setTab('visitors')">
+        Visitors
+      </button>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <div class="header-actions">
+      <button class="icon-btn" title="Reload" (click)="loadAll()">
+        <img [src]="peopleUrl + '/assets/icons/reload.png'" alt="reload">
+      </button>
+      <button class="icon-btn" title="Add" (click)="openAdd()">
+        <img [src]="peopleUrl + '/assets/icons/add.png'" alt="add">
+      </button>
+      <button class="icon-btn" title="upload">
+        <img [src]="peopleUrl + '/assets/icons/upload.png'" alt="upload">
+      </button>
+      <button class="icon-btn" title="download">
+        <img [src]="peopleUrl + '/assets/icons/download.png'" alt="download">
+      </button>
+      <button class="icon-btn" title="columns" (click)="toggleColumnPicker()">
+        <img [src]="peopleUrl + '/assets/icons/columns.png'" alt="columns">
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Column picker popup -->
+  <div class="popup-overlay" *ngIf="showColumnPicker">
+    <div class="popup column-picker" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Show / Hide Columns</h3>
+        <button class="popup-close" (click)="closeColumnPicker()">&times;</button>
+      </div>
+      <div class="popup-body">
+        <label class="column-option" *ngFor="let col of draftColumns">
+          <input type="checkbox" [(ngModel)]="col.visible">
+          <span>{{ col.label }}</span>
+        </label>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="resetColumns()">Reset</button>
+        <button class="btn-save" (click)="saveColumns()">Save</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Employees Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'employees' && !loading">
+    <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th *ngIf="isColumnVisible('firstname')">First Name</th>
+          <th *ngIf="isColumnVisible('lastname')">Last Name</th>
+          <th *ngIf="isColumnVisible('dept')">Department</th>
+          <th *ngIf="isColumnVisible('role')">Designation</th>
+          <th *ngIf="isColumnVisible('phoneNo')">Phone No</th>
+          <th *ngIf="isColumnVisible('company')">Company</th>
+          <th *ngIf="isColumnVisible('idNumber')">ID Number</th>
+          <th *ngIf="isColumnVisible('nationalId')">National ID</th>
+          <th *ngIf="isColumnVisible('startDate')">Start Date</th>
+          <th *ngIf="isColumnVisible('endDate')">End Date</th>
+          <th *ngIf="isColumnVisible('cardBadgeNumber')">Card/Badge Number</th>
+          <th *ngIf="isColumnVisible('sowIdVehicleId')">SOW Id/Vehicle Id</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let emp of filteredEmployees; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td *ngIf="isColumnVisible('firstname')">{{ emp.firstname }}</td>
+          <td *ngIf="isColumnVisible('lastname')">{{ emp.lastname }}</td>
+          <td *ngIf="isColumnVisible('dept')">{{ emp.dept }}</td>
+          <td *ngIf="isColumnVisible('role')">{{ emp.role }}</td>
+          <td *ngIf="isColumnVisible('phoneNo')">{{ emp.phoneNo }}</td>
+          <td *ngIf="isColumnVisible('company')">{{ emp.company }}</td>
+          <td *ngIf="isColumnVisible('idNumber')">{{ emp.idNumber }}</td>
+          <td *ngIf="isColumnVisible('nationalId')">{{ emp.nationalId }}</td>
+          <td *ngIf="isColumnVisible('startDate')">{{ formatDate(emp.startDate) }}</td>
+          <td *ngIf="isColumnVisible('endDate')">{{ formatDate(emp.endDate) }}</td>
+          <td *ngIf="isColumnVisible('cardBadgeNumber')">{{ emp.cardBadgeNumber }}</td>
+          <td *ngIf="isColumnVisible('sowIdVehicleId')">{{ emp.sowIdVehicleId }}</td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(emp)">
+              <img [src]="peopleUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(emp.id!)">
+              <img [src]="peopleUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredEmployees.length === 0">
+          <td [attr.colspan]="visibleColumnCount" class="no-data">No employees found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Contractors Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'contractors' && !loading">
+    <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th *ngIf="isColumnVisible('contractorName')">Contractor Name</th>
+          <th *ngIf="isColumnVisible('contractorId')">Contractor ID</th>
+          <th *ngIf="isColumnVisible('companyName')">Company Name</th>
+          <th *ngIf="isColumnVisible('projectName')">Project Name</th>
+          <th *ngIf="isColumnVisible('phoneNo')">Phone No</th>
+          <th *ngIf="isColumnVisible('nationality')">Nationality</th>
+          <th *ngIf="isColumnVisible('address')">Address</th>
+          <th *ngIf="isColumnVisible('referenceId')">Reference ID</th>
+          <th *ngIf="isColumnVisible('contractStart')">Contract Start</th>
+          <th *ngIf="isColumnVisible('contractEnd')">Contract End</th>
+          <th *ngIf="isColumnVisible('vehicleName')">Vehicle Name</th>
+          <th *ngIf="isColumnVisible('vehicleId')">Vehicle ID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let con of filteredContractors; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td *ngIf="isColumnVisible('contractorName')">{{ con.contractorName }}</td>
+          <td *ngIf="isColumnVisible('contractorId')">{{ con.contractorId }}</td>
+          <td *ngIf="isColumnVisible('companyName')">{{ con.companyName }}</td>
+          <td *ngIf="isColumnVisible('projectName')">{{ con.projectName }}</td>
+          <td *ngIf="isColumnVisible('phoneNo')">{{ con.phoneNo }}</td>
+          <td *ngIf="isColumnVisible('nationality')">{{ con.nationality }}</td>
+          <td *ngIf="isColumnVisible('address')">{{ con.address }}</td>
+          <td *ngIf="isColumnVisible('referenceId')">{{ con.referenceId }}</td>
+          <td *ngIf="isColumnVisible('contractStart')">{{ formatDate(con.contractStart) }}</td>
+          <td *ngIf="isColumnVisible('contractEnd')">{{ formatDate(con.contractEnd) }}</td>
+          <td *ngIf="isColumnVisible('vehicleName')">{{ con.vehicleName }}</td>
+          <td *ngIf="isColumnVisible('vehicleId')">{{ con.vehicleId }}</td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(con)">
+              <img [src]="peopleUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(con.id!)">
+              <img [src]="peopleUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredContractors.length === 0">
+          <td [attr.colspan]="visibleColumnCount" class="no-data">No contractors found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Visitors Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'visitors' && !loading">
+    <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th *ngIf="isColumnVisible('firstname')">First Name</th>
+          <th *ngIf="isColumnVisible('lastname')">Last Name</th>
+          <th *ngIf="isColumnVisible('startDate')">Start Date</th>
+          <th *ngIf="isColumnVisible('endDate')">End Date</th>
+          <th *ngIf="isColumnVisible('company')">Company to Visit</th>
+          <th *ngIf="isColumnVisible('dept')">Department to Visit</th>
+          <th *ngIf="isColumnVisible('nationalId')">National ID</th>
+          <th *ngIf="isColumnVisible('sowIdVehicleId')">SOW Id/Vehicle Id</th>
+          <th *ngIf="isColumnVisible('idNumber')">ID Number</th>
+          <th *ngIf="isColumnVisible('phoneNo')">Phone No</th>
+          <th *ngIf="isColumnVisible('cardBadgeNumber')">Card Badge Number</th>
+          <th *ngIf="isColumnVisible('email')">Email Id</th>
+          <th *ngIf="isColumnVisible('visitorCompany')">Visitor Company</th>
+          <th *ngIf="isColumnVisible('documentId')">Document ID</th>
+          <th *ngIf="isColumnVisible('documentType')">Document Type</th>
+          <th *ngIf="isColumnVisible('authCode')">Authorization Code</th>
+          <th *ngIf="isColumnVisible('action')">Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let vis of filteredVisitors; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td *ngIf="isColumnVisible('firstname')">{{ vis.firstname }}</td>
+          <td *ngIf="isColumnVisible('lastname')">{{ vis.lastname }}</td>
+          <td *ngIf="isColumnVisible('startDate')">{{ formatDate(vis.startDate) }}</td>
+          <td *ngIf="isColumnVisible('endDate')">{{ formatDate(vis.endDate) }}</td>
+          <td *ngIf="isColumnVisible('company')">{{ vis.company }}</td>
+          <td *ngIf="isColumnVisible('dept')">{{ vis.dept }}</td>
+          <td *ngIf="isColumnVisible('nationalId')">{{ vis.nationalId }}</td>
+          <td *ngIf="isColumnVisible('sowIdVehicleId')">{{ vis.sowIdVehicleId }}</td>
+          <td *ngIf="isColumnVisible('idNumber')">{{ vis.idNumber }}</td>
+          <td *ngIf="isColumnVisible('phoneNo')">{{ vis.phoneNo }}</td>
+          <td *ngIf="isColumnVisible('cardBadgeNumber')">{{ vis.cardBadgeNumber }}</td>
+          <td *ngIf="isColumnVisible('email')">{{ vis.email }}</td>
+          <td *ngIf="isColumnVisible('visitorCompany')">{{ vis.visitorCompany }}</td>
+          <td *ngIf="isColumnVisible('documentId')">{{ vis.documentId }}</td>
+          <td *ngIf="isColumnVisible('documentType')">{{ vis.documentType }}</td>
+          <td *ngIf="isColumnVisible('authCode')">{{ vis.authCode }}</td>
+          <td *ngIf="isColumnVisible('action')">
+            <label class="toggle-switch small">
+              <input type="checkbox" [checked]="vis.action === 'Active'" (change)="toggleVisitorStatus(vis)">
+              <span class="toggle-slider"></span>
+            </label>
+          </td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(vis)">
+              <img [src]="peopleUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(vis.id!)">
+              <img [src]="peopleUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredVisitors.length === 0">
+          <td [attr.colspan]="visibleColumnCount" class="no-data">No visitors found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ popupTitle }}</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <ng-container *ngIf="popupType === 'employee'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" [(ngModel)]="employeeForm.firstname" placeholder="First name"
+                [class.invalid]="isInvalid(employeeForm.firstname)">
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" [(ngModel)]="employeeForm.lastname" placeholder="Last name"
+                [class.invalid]="isInvalid(employeeForm.lastname)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" [(ngModel)]="employeeForm.dept" placeholder="Department"
+                [class.invalid]="isInvalid(employeeForm.dept)">
+            </div>
+            <div class="form-group">
+              <label>Designation</label>
+              <input type="text" [(ngModel)]="employeeForm.role" placeholder="Designation"
+                [class.invalid]="isInvalid(employeeForm.role)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone No</label>
+              <input type="text" [(ngModel)]="employeeForm.phoneNo" placeholder="Phone"
+                [class.invalid]="isInvalid(employeeForm.phoneNo)">
+            </div>
+            <div class="form-group">
+              <label>Company</label>
+              <input type="text" [(ngModel)]="employeeForm.company" placeholder="Company"
+                [class.invalid]="isInvalid(employeeForm.company)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>ID Number</label>
+              <input type="text" [(ngModel)]="employeeForm.idNumber" placeholder="ID number"
+                [class.invalid]="isInvalid(employeeForm.idNumber)">
+            </div>
+            <div class="form-group">
+              <label>National ID</label>
+              <input type="text" [(ngModel)]="employeeForm.nationalId" placeholder="National ID"
+                [class.invalid]="isInvalid(employeeForm.nationalId)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="date" [(ngModel)]="employeeForm.startDate" [min]="!isEdit ? todayDateStr : null"
+                [class.invalid]="isInvalid(employeeForm.startDate) || dateError === 'start' || dateError === 'both'">
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <input type="date" [(ngModel)]="employeeForm.endDate" [min]="employeeForm.startDate || null"
+                [class.invalid]="isInvalid(employeeForm.endDate) || dateError === 'end' || dateError === 'both'">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Card/Badge Number</label>
+              <input type="text" [(ngModel)]="employeeForm.cardBadgeNumber" placeholder="Card/Badge"
+                [class.invalid]="isInvalid(employeeForm.cardBadgeNumber)">
+            </div>
+            <div class="form-group">
+              <label>Reference ID</label>
+              <input type="text" [(ngModel)]="employeeForm.referenceId" placeholder="Reference ID"
+                [class.invalid]="isInvalid(employeeForm.referenceId)">
+            </div>
+          </div>
+
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>SOW Id/Vehicle Id</label>
+              <input type="text" [(ngModel)]="employeeForm.sowIdVehicleId" placeholder="National ID"
+                [class.invalid]="isInvalid(employeeForm.sowIdVehicleId)">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group map-path-group">
+              <label>Employee Image</label>
+              <div class="map-upload">
+                <button type="button" class="btn-upload" (click)="employeeImageInput.click()">
+                  <i class="ti ti-upload"></i> Upload Image
+                </button>
+                <input #employeeImageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)">
+              </div>
+              <div class="map-preview" *ngIf="pendingImagePreview || employeeForm.employeeImage">
+                <img [src]="pendingImagePreview || employeeForm.employeeImage" alt="Employee image preview">
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'contractor'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Contractor Name</label>
+              <input type="text" [(ngModel)]="contractorForm.contractorName" placeholder="Name"
+                [class.invalid]="isInvalid(contractorForm.contractorName)">
+            </div>
+            <div class="form-group">
+              <label>Contractor ID</label>
+              <input type="text" [(ngModel)]="contractorForm.contractorId" placeholder="ID"
+                [class.invalid]="isInvalid(contractorForm.contractorId)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Company Name</label>
+              <input type="text" [(ngModel)]="contractorForm.companyName" placeholder="Company"
+                [class.invalid]="isInvalid(contractorForm.companyName)">
+            </div>
+            <div class="form-group">
+              <label>Project Name</label>
+              <input type="text" [(ngModel)]="contractorForm.projectName" placeholder="Project">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone No</label>
+              <input type="text" [(ngModel)]="contractorForm.phoneNo" placeholder="Phone">
+            </div>
+            <div class="form-group">
+              <label>Nationality</label>
+              <input type="text" [(ngModel)]="contractorForm.nationality" placeholder="Nationality">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" [(ngModel)]="contractorForm.address" placeholder="Address">
+            </div>
+            <div class="form-group">
+              <label>Reference ID</label>
+              <input type="text" [(ngModel)]="contractorForm.referenceId" placeholder="Reference ID">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Contract Start</label>
+              <input type="date" [(ngModel)]="contractorForm.contractStart" [min]="!isEdit ? todayDateStr : null"
+                [class.invalid]="isInvalid(contractorForm.contractStart) || dateError === 'start' || dateError === 'both'">
+            </div>
+            <div class="form-group">
+              <label>Contract End</label>
+              <input type="date" [(ngModel)]="contractorForm.contractEnd" [min]="contractorForm.contractStart || null"
+                [class.invalid]="isInvalid(contractorForm.contractEnd) || dateError === 'end' || dateError === 'both'">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Vehicle Name</label>
+              <input type="text" [(ngModel)]="contractorForm.vehicleName" placeholder="Vehicle name">
+            </div>
+            <div class="form-group">
+              <label>Vehicle ID</label>
+              <input type="text" [(ngModel)]="contractorForm.vehicleId" placeholder="Vehicle ID">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group map-path-group">
+              <label>Contractor Image</label>
+              <div class="map-upload">
+                <button type="button" class="btn-upload" (click)="contractorImageInput.click()">
+                  <i class="ti ti-upload"></i> Upload Image
+                </button>
+                <input #contractorImageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)">
+              </div>
+              <div class="map-preview" *ngIf="pendingImagePreview || contractorForm.contractorImage">
+                <img [src]="pendingImagePreview || contractorForm.contractorImage" alt="Contractor image preview">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'visitor'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" [(ngModel)]="visitorForm.firstname" placeholder="First name"
+                [class.invalid]="isInvalid(visitorForm.firstname)">
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" [(ngModel)]="visitorForm.lastname" placeholder="Last name"
+                [class.invalid]="isInvalid(visitorForm.lastname)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>ID Number</label>
+              <input type="text" [(ngModel)]="visitorForm.idNumber" placeholder="ID number">
+            </div>
+            <div class="form-group">
+              <label>Phone No</label>
+              <input type="text" [(ngModel)]="visitorForm.phoneNo" placeholder="Phone">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="visitorForm.email" placeholder="Email"
+                [class.invalid]="isInvalid(visitorForm.email)">
+            </div>
+            <div class="form-group">
+              <label>Company To Visit</label>
+              <select [(ngModel)]="visitorForm.company" [class.invalid]="isInvalid(visitorForm.company)">
+                <option value="" disabled>Select company</option>
+                <option *ngFor="let c of companies" [value]="c.companyName">{{ c.companyName }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department To Visit</label>
+              <select [(ngModel)]="visitorForm.dept" [class.invalid]="isInvalid(visitorForm.dept)">
+                <option value="" disabled>Select department</option>
+                <option *ngFor="let d of departments" [value]="d.departmentName">{{ d.departmentName }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>National ID</label>
+              <input type="text" [(ngModel)]="visitorForm.nationalId" placeholder="National ID">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>SOW Id/Vehicle Id</label>
+              <input type="text" [(ngModel)]="visitorForm.sowIdVehicleId" placeholder="SOW Id/Vehicle Id">
+            </div>
+            <div class="form-group">
+              <label>Card Badge Number</label>
+              <input type="text" [(ngModel)]="visitorForm.cardBadgeNumber" placeholder="Card Badge Number">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Visitor Company</label>
+              <input type="text" [(ngModel)]="visitorForm.visitorCompany" placeholder="Visitor company"
+                [class.invalid]="isInvalid(visitorForm.visitorCompany)">
+            </div>
+            <div class="form-group">
+              <label>Host Person</label>
+              <input type="text" [(ngModel)]="visitorForm.hostPerson" placeholder="Host person"
+                [class.invalid]="isInvalid(visitorForm.hostPerson)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Host Email</label>
+              <input type="email" [(ngModel)]="visitorForm.hostPersonEmail" placeholder="Host email"
+                [class.invalid]="isInvalid(visitorForm.hostPersonEmail)">
+            </div>
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="date" [(ngModel)]="visitorForm.startDate" [min]="!isEdit ? todayDateStr : visitorOriginalStartDate"
+                [class.invalid]="isInvalid(visitorForm.startDate) || dateError === 'start' || dateError === 'both'">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>End Date</label>
+              <input type="date" [(ngModel)]="visitorForm.endDate" [min]="visitorForm.startDate || null"
+                [class.invalid]="isInvalid(visitorForm.endDate) || dateError === 'end' || dateError === 'both'">
+            </div>
+            <div class="form-group">
+              <label>Document Type</label>
+              <select [(ngModel)]="visitorForm.documentType">
+                <option value="" disabled>Select document type</option>
+                <option *ngFor="let dt of documentTypes" [value]="dt">{{ dt }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Document ID</label>
+              <input type="text" [(ngModel)]="visitorForm.documentId" placeholder="Document ID">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="visitorActive">
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">{{ visitorActive ? 'Active' : 'Inactive' }}</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group map-path-group">
+              <label>Visitor Image</label>
+              <div class="map-upload">
+                <button type="button" class="btn-upload" (click)="visitorImageInput.click()">
+                  <i class="ti ti-upload"></i> Upload Image
+                </button>
+                <input #visitorImageInput type="file" accept="image/*" hidden (change)="onImageSelected($event)">
+              </div>
+              <div class="map-preview" *ngIf="pendingImagePreview || visitorForm.visitorImage">
+                <img [src]="pendingImagePreview || visitorForm.visitorImage" alt="Visitor image preview">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

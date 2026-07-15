@@ -1,0 +1,136 @@
+<div class="identification-panel">
+  <div class="panel-header">
+    <div class="radio-tabs">
+      <label class="radio-tab" *ngFor="let type of identificationTypes">
+        <input
+          type="radio"
+          name="identificationTypeFilter"
+          [value]="type"
+          [checked]="activeType === type"
+          (change)="selectType(type)">
+        {{ type | titlecase }}
+      </label>
+    </div>
+    <button type="button" class="btn-add" (click)="openAdd()">
+      <i class="ti ti-plus"></i> Add Identification
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Identification Name</th>
+          <th>Reader Id</th>
+          <th>Entry/Exit</th>
+          <th>Reader Type Name</th>
+          <th>Created At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.name }}</td>
+          <td>{{ item.readerId }}</td>
+          <td>{{ item.entryExistPoint || item.entryExistId }}</td>
+          <td>{{ item.readerTypeName }}</td>
+          <td>{{ item.createdAt ? (item.createdAt | date: 'medium') : '-' }}</td>
+          <td class="actions">
+            <button type="button" class="icon-btn" title="Edit" (click)="openEdit(item)">
+              <i class="ti ti-pencil"></i>
+            </button>
+            <button type="button" class="icon-btn danger" title="Delete" (click)="delete(item.id!)">
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="6" class="no-data">No {{ activeType }} identification records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit Identification' : 'Add Identification' }}</h3>
+        <button type="button" class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="form-group">
+          <label>Identification Name</label>
+          <input type="text" [(ngModel)]="form.name" name="name" placeholder="Identification name">
+        </div>
+
+        <div class="form-group">
+          <label>Reader Id</label>
+          <select [(ngModel)]="form.readerKey" name="readerKey">
+            <option value="" disabled>Select reader</option>
+            <option *ngFor="let device of devices" [value]="device.id ?? device.uniqueId">
+              {{ device.type }} ({{ device.uniqueId }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Entry/Exit</label>
+          <select [(ngModel)]="form.entryExistId" name="entryExistId">
+            <option value="" disabled>Select entry/exit</option>
+            <option *ngFor="let option of entryExitOptions" [value]="option.id">
+              {{ option.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Reader Type Name</label>
+          <select [(ngModel)]="form.readerTypeKey" name="readerTypeKey">
+            <option value="" disabled>Select reader type</option>
+            <option *ngFor="let device of devices" [value]="device.id ?? device.uniqueId">
+              {{ device.projectName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Identification Type</label>
+          <select [(ngModel)]="form.identificationType" name="identificationType">
+            <option *ngFor="let type of identificationTypes" [value]="type">{{ type | titlecase }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? (isEdit ? 'Saving...' : 'Creating...') : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Delete this identification record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+</div>

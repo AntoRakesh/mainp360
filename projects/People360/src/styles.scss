@@ -1,0 +1,29 @@
+/* You can add global styles to this file, and also import other style files */
+// :host {
+//   display: block;
+//   height: 100%;
+// }
+// * {
+//   box-sizing: border-box;
+//   margin: 0;
+//   padding: 0;
+// }
+
+// html, body, app-root {
+//   height: 100%;
+//   width: 100%;
+//   display: block;
+// }
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, app-root {
+  height: 100%;
+  width: 100%;
+  display: block;
+  overflow: hidden;
+}

@@ -1,0 +1,220 @@
+<div class="ot-master-container">
+  <!-- Top row -->
+  <div class="top-row">
+    <h2>OT Master</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" title="Add" (click)="openAdd()">
+        <img [src]="otManagementUrl + '/assets/icons/add.png'" alt="add">
+      </button>
+      <button class="icon-btn" title="Reload" (click)="loadOts()">
+        <img [src]="otManagementUrl + '/assets/icons/reload.png'" alt="reload">
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Unique ID</th>
+          <th>OT Name</th>
+          <th>Department</th>
+          <th>Floor</th>
+          <th>Type</th>
+          <th>Capacity</th>
+          <th>Project</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of filteredOts; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ o.uniqueId }}</td>
+          <td>{{ o.otName }}</td>
+          <td>{{ o.department }}</td>
+          <td>{{ o.floor }}</td>
+          <td>{{ o.type }}</td>
+          <td>{{ o.capacity }}</td>
+          <td>{{ o.project }}</td>
+          <td><span class="badge" [class.active]="o.status">{{ o.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(o)">
+              <img [src]="otManagementUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(o.id!)">
+              <img [src]="otManagementUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredOts.length === 0">
+          <td colspan="10" class="no-data">No OTs found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit' : 'Add' }} OT</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Unique ID</label>
+            <input type="text" [(ngModel)]="form.uniqueId" [disabled]="isEdit" placeholder="Enter unique ID">
+          </div>
+          <div class="form-group">
+            <label>OT Name</label>
+            <input type="text" [(ngModel)]="form.otName" placeholder="Enter OT name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Department</label>
+            <input type="text" [(ngModel)]="form.department" placeholder="Enter department">
+          </div>
+          <div class="form-group">
+            <label>Floor</label>
+            <select [(ngModel)]="form.floor">
+              <option value="">-- Select Floor --</option>
+              <option *ngFor="let f of floorOptions" [value]="f.floorName">{{ f.floorName }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Capacity</label>
+            <input type="text" [(ngModel)]="form.capacity" placeholder="Enter capacity">
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <input type="text" [(ngModel)]="form.type" placeholder="Enter type">
+          </div>
+        </div>
+
+        <div class="section-title">Environment</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sterilization</label>
+            <input type="text" [(ngModel)]="form.sterilization" placeholder="Enter sterilization">
+          </div>
+          <div class="form-group">
+            <label>Air Pressure</label>
+            <input type="text" [(ngModel)]="form.airPressure" placeholder="Enter air pressure">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Temperature</label>
+            <input type="text" [(ngModel)]="form.temperature" placeholder="Enter temperature">
+          </div>
+          <div class="form-group">
+            <label>Humidity</label>
+            <input type="text" [(ngModel)]="form.humidity" placeholder="Enter humidity">
+          </div>
+        </div>
+
+        <div class="section-title">Location</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Project</label>
+            <select [(ngModel)]="form.project">
+              <option value="">-- Select Project --</option>
+              <option *ngFor="let p of projectOptions" [value]="p.projectName">{{ p.projectName }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <select [(ngModel)]="form.country">
+              <option value="">-- Select Country --</option>
+              <option *ngFor="let c of countryOptions" [value]="c.countryName">{{ c.countryName }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Area</label>
+            <select [(ngModel)]="form.area">
+              <option value="">-- Select Area --</option>
+              <option *ngFor="let a of areaOptions" [value]="a.areaName">{{ a.areaName }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Building</label>
+            <select [(ngModel)]="form.building">
+              <option value="">-- Select Building --</option>
+              <option *ngFor="let b of buildingOptions" [value]="b.buildingName">{{ b.buildingName }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Zone</label>
+          <select [(ngModel)]="form.zone">
+            <option value="">-- Select Zone --</option>
+            <option *ngFor="let z of zoneOptions" [value]="z.zoneName">{{ z.zoneName }}</option>
+          </select>
+        </div>
+
+        <div class="toggle-row">
+          <span class="toggle-label">Status</span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="form.status">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-state">{{ form.status ? 'Active' : 'Inactive' }}</span>
+        </div>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,714 @@
+<div class="attendance-container">
+  <!-- Top row -->
+  <div class="top-row">
+    <h2>{{ activeTab }}</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab === 'Work Schedule'" (click)="setTab('Work Schedule')">Work
+        Schedule</button>
+      <button class="tab" [class.active]="activeTab === 'Manual Attendance'"
+        (click)="setTab('Manual Attendance')">Manual Attendance</button>
+      <button class="tab" [class.active]="activeTab === 'Greeting'" (click)="setTab('Greeting')">Greeting</button>
+      <button class="tab" [class.active]="activeTab === 'Extras'" (click)="setTab('Extras')">Extras</button>
+    </div>
+  </div>
+
+  <!-- Icons row -->
+  <div class="actions-row">
+    <div class="greeting-subtabs" *ngIf="activeTab === 'Greeting'">
+      <button class="subtab" [class.active]="activeGreetingTab === 'Individual'"
+        (click)="setGreetingTab('Individual')">Individual</button>
+      <button class="subtab" [class.active]="activeGreetingTab === 'Group'"
+        (click)="setGreetingTab('Group')">Group</button>
+    </div>
+    <div class="greeting-subtabs" *ngIf="activeTab === 'Extras'">
+      <button class="subtab" [class.active]="activeExtrasTab === 'Company'"
+        (click)="setExtrasTab('Company')">Company</button>
+      <button class="subtab" [class.active]="activeExtrasTab === 'Department'"
+        (click)="setExtrasTab('Department')">Department</button>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" title="Add" (click)="openAdd()">
+        <i class="ti ti-plus"></i>
+      </button>
+      <button class="icon-btn" title="Reload" (click)="loadAll()">
+        <i class="ti ti-refresh"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Work Schedule Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'Work Schedule' && !loading">
+    <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Schedule Name</th>
+          <!-- <th>Location</th> -->
+          <th>Group Name</th>
+          <th>Schedule Type</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ws of filteredWorkSchedules; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ ws.workScheduleName }}</td>
+          <!-- <td>{{ ws.location }}</td> -->
+          <td>{{ ws.groupName }}</td>
+          <td>{{ ws.scheduleType }}</td>
+          <td><span class="badge" [class.active]="ws.status">{{ ws.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(ws)"><i class="ti ti-edit"></i></button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(ws.id!)"><i
+                class="ti ti-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredWorkSchedules.length === 0">
+          <td colspan="7" class="no-data">No work schedules found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Manual Attendance Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'Manual Attendance' && !loading">
+    <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ID Number</th>
+          <th>Employee Name</th>
+          <th>Reason</th>
+          <th>From Date</th>
+          <th>From Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ma of filteredManualAttendances; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ getEmployeeIdNumber(ma.employeeId) }}</td>
+          <td>{{ ma.employeeName }}</td>
+          <td>{{ ma.reason }}</td>
+          <td>{{ ma.fromDate | date:'shortDate' }}</td>
+          <td>{{ ma.fromTime }}</td>
+          <td><span class="badge active">{{ ma.attendanceStatus }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(ma)"><i class="ti ti-edit"></i></button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(ma.id!)"><i
+                class="ti ti-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredManualAttendances.length === 0">
+          <td colspan="8" class="no-data">No manual attendance records found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Greeting Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'Greeting' && !loading">
+
+    <!-- Individual -->
+    <div class="table-wrap" *ngIf="activeGreetingTab === 'Individual'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Member Name</th>
+          <th>Member Type</th>
+          <th>Greeting Type</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let gi of filteredIndividuals; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ getMemberNames(gi.memberList) }}</td>
+          <td>{{ gi.memberType }}</td>
+          <td>{{ gi.greetingsType }}</td>
+          <td>{{ gi.greetingsDescription }}</td>
+          <td><span class="badge" [class.active]="gi.status">{{ gi.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(gi)"><i class="ti ti-edit"></i></button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(gi.id!)"><i
+                class="ti ti-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredIndividuals.length === 0">
+          <td colspan="7" class="no-data">No individual greetings found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- Group -->
+    <div class="table-wrap" *ngIf="activeGreetingTab === 'Group'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Group Name</th>
+          <th>Group Type</th>
+          <th>Greeting Type</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let gg of filteredGroups; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ gg.groupName }}</td>
+          <td>{{ gg.groupType }}</td>
+          <td>{{ gg.greetingsType }}</td>
+          <td>{{ gg.greetingsDescription }}</td>
+          <td><span class="badge" [class.active]="gg.status">{{ gg.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(gg)"><i class="ti ti-edit"></i></button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(gg.id!)"><i
+                class="ti ti-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredGroups.length === 0">
+          <td colspan="7" class="no-data">No group greetings found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Extras Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'Extras' && !loading">
+
+    <!-- Company -->
+    <div class="table-wrap" *ngIf="activeExtrasTab === 'Company'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Company Name</th>
+          <th>Project Name</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filteredCompanies; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ c.companyName }}</td>
+          <td>{{ c.projectName }}</td>
+          <td>{{ c.description }}</td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(c)"><i class="ti ti-edit"></i></button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(c.id!)"><i
+                class="ti ti-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredCompanies.length === 0">
+          <td colspan="5" class="no-data">No companies found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- Department -->
+    <div class="table-wrap" *ngIf="activeExtrasTab === 'Department'">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Department Name</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of filteredDepartments; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ d.departmentName }}</td>
+          <td>{{ d.description }}</td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(d)"><i class="ti ti-edit"></i></button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(d.id!)"><i
+                class="ti ti-trash"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredDepartments.length === 0">
+          <td colspan="4" class="no-data">No departments found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ popupTitle }}</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <!-- Work Schedule form -->
+        <!-- Work Schedule form -->
+        <ng-container *ngIf="popupType === 'workschedule'">
+
+          <div class="form-group">
+            <label>Work Schedule Name</label>
+            <input type="text" [(ngModel)]="workScheduleForm.workScheduleName" placeholder="Schedule name">
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" [(ngModel)]="workScheduleForm.description" placeholder="Description">
+          </div>
+
+          <div class="form-group">
+            <label>Group Name</label>
+            <select [(ngModel)]="selectedGroupId" (ngModelChange)="onWsGroupChange()">
+              <option value="">-- Select Group --</option>
+              <option *ngFor="let g of groups" [value]="g.id">{{ g.groupName }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Group Member</label>
+            <select [(ngModel)]="selectedWsMember" (ngModelChange)="addWsMember()" [disabled]="!selectedGroupId">
+              <option value="">-- Select Member --</option>
+              <option *ngFor="let m of groupMemberOptions" [value]="m.id">{{ m.label }}</option>
+            </select>
+          </div>
+
+          <div class="chips" *ngIf="workScheduleForm.member && workScheduleForm.member.length > 0">
+            <span class="chip" *ngFor="let m of workScheduleForm.member">
+              {{ m.memberName }}
+              <button class="chip-remove" (click)="removeWsMember(m.memberID)">✕</button>
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Schedule Type</label>
+            <input type="text" [(ngModel)]="workScheduleForm.scheduleType" placeholder="Schedule type">
+          </div>
+
+          <!-- Status toggle -->
+          <div class="toggle-row">
+            <span class="toggle-label">Status</span>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="workScheduleForm.status">
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-state">{{ workScheduleForm.status ? 'Active' : 'Inactive' }}</span>
+          </div>
+
+          <!-- Work Schedule section -->
+          <div class="schedule-header">
+            <span class="schedule-title">Work Schedule</span>
+            <button class="icon-btn small" title="Add Schedule" (click)="addWsSchedule()">
+              <i class="ti ti-plus"></i>
+            </button>
+          </div>
+
+          <div class="schedule-block" *ngFor="let sch of wsSchedules; let i = index">
+            <div class="schedule-block-header">
+              <span>Schedule {{ i + 1 }}</span>
+              <button class="chip-remove" *ngIf="wsSchedules.length > 1" (click)="removeWsSchedule(i)">✕</button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Date</label>
+                <input type="date" [(ngModel)]="sch.fromDate">
+              </div>
+              <div class="form-group">
+                <label>To Date</label>
+                <input type="date" [(ngModel)]="sch.toDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Time</label>
+                <input type="time" [(ngModel)]="sch.fromTime">
+              </div>
+              <div class="form-group">
+                <label>To Time</label>
+                <input type="time" [(ngModel)]="sch.toTime">
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+        <!-- Manual Attendance form -->
+        <!-- <ng-container *ngIf="popupType === 'manual'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Employee ID</label>
+              <input type="text" [(ngModel)]="manualAttendanceForm.employeeId" placeholder="Employee ID">
+            </div>
+            <div class="form-group">
+              <label>Attendance Status</label>
+              <input type="text" [(ngModel)]="manualAttendanceForm.attendanceStatus" placeholder="Status">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>From Date</label>
+              <input type="datetime-local" [(ngModel)]="manualAttendanceForm.fromDate">
+            </div>
+            <div class="form-group">
+              <label>From Time</label>
+              <input type="text" [(ngModel)]="manualAttendanceForm.fromTime" placeholder="e.g. 09:00">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Reason</label>
+              <input type="text" [(ngModel)]="manualAttendanceForm.reason" placeholder="Reason">
+            </div>
+          </div>
+        </ng-container> -->
+
+
+        <!-- Manual Attendance form -->
+        <ng-container *ngIf="popupType === 'manual'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Employee</label>
+              <select [(ngModel)]="selectedEmployeeId" (ngModelChange)="onEmployeeChange()">
+                <option value="">-- Select Employee --</option>
+                <option *ngFor="let emp of employees" [value]="emp.id">
+                  {{ emp.firstname }} {{ emp.lastname }} ({{ emp.idNumber }})
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>From Date</label>
+              <input type="date" [(ngModel)]="manualAttendanceForm.fromDate">
+            </div>
+            <div class="form-group">
+              <label>From Time</label>
+              <input type="time" [(ngModel)]="manualAttendanceForm.fromTime">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Reason</label>
+              <select [(ngModel)]="selectedReason" (ngModelChange)="onReasonChange()">
+                <option value="">-- Select Reason --</option>
+                <option *ngFor="let r of reasonOptions" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" *ngIf="selectedReason === 'Others'">
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label>Please specify reason</label>
+              <input type="text" [(ngModel)]="otherReason" (ngModelChange)="onOtherReasonChange()"
+                placeholder="Enter your reason">
+            </div>
+          </div>
+
+          <!-- Attendance Status radio buttons - last field -->
+          <div class="form-group">
+            <label>Attendance Status</label>
+            <div class="radio-row">
+              <label class="radio-option">
+                <input type="radio" name="attendanceStatus" value="In"
+                  [(ngModel)]="manualAttendanceForm.attendanceStatus"> In
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="attendanceStatus" value="Out"
+                  [(ngModel)]="manualAttendanceForm.attendanceStatus"> Out
+              </label>
+            </div>
+          </div>
+        </ng-container>
+
+
+
+        <!-- Greeting Individual form -->
+        <ng-container *ngIf="popupType === 'individual'">
+
+          <!-- Radio row -->
+          <div class="radio-row">
+            <label class="radio-option">
+              <input type="radio" name="individualMemberType" value="Employee"
+                [(ngModel)]="greetingIndividualMemberType" (ngModelChange)="onIndividualMemberTypeChange()"> Employee
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="individualMemberType" value="Contractor"
+                [(ngModel)]="greetingIndividualMemberType" (ngModelChange)="onIndividualMemberTypeChange()"> Contractor
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="individualMemberType" value="Visitor"
+                [(ngModel)]="greetingIndividualMemberType" (ngModelChange)="onIndividualMemberTypeChange()"> Visitor
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Member</label>
+            <select [(ngModel)]="selectedIndividualMember" (ngModelChange)="onIndividualMemberSelect()">
+              <option value="">-- Select Member --</option>
+              <option *ngFor="let m of getGreetingMemberOptions(greetingIndividualMemberType)" [value]="m.id">
+                {{ m.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Greeting Type</label>
+            <input type="text" [(ngModel)]="greetingIndividualForm.greetingsType" placeholder="Greeting type">
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" [(ngModel)]="greetingIndividualForm.greetingsDescription" placeholder="Description">
+          </div>
+
+          <!-- Status toggle -->
+          <div class="toggle-row">
+            <span class="toggle-label">Status</span>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="greetingIndividualForm.status">
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-state">{{ greetingIndividualForm.status ? 'Active' : 'Inactive' }}</span>
+          </div>
+
+          <!-- Time Schedule -->
+          <div class="schedule-header">
+            <span class="schedule-title">Time Schedule</span>
+            <button class="icon-btn small" title="Add Schedule" (click)="addIndividualSchedule()">
+              <i class="ti ti-plus"></i>
+            </button>
+          </div>
+
+          <div class="schedule-block" *ngFor="let sch of individualSchedules; let i = index">
+            <div class="schedule-block-header">
+              <span>Schedule {{ i + 1 }}</span>
+              <button class="chip-remove" *ngIf="individualSchedules.length > 1" (click)="removeIndividualSchedule(i)">✕</button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Date</label>
+                <input type="date" [(ngModel)]="sch.fromDate">
+              </div>
+              <div class="form-group">
+                <label>To Date</label>
+                <input type="date" [(ngModel)]="sch.toDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Time</label>
+                <input type="time" [(ngModel)]="sch.fromTime">
+              </div>
+              <div class="form-group">
+                <label>To Time</label>
+                <input type="time" [(ngModel)]="sch.toTime">
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- Greeting Group form -->
+        <ng-container *ngIf="popupType === 'group'">
+
+          <!-- Radio row -->
+          <div class="radio-row">
+            <label class="radio-option">
+              <input type="radio" name="groupMemberType" value="Employee"
+                [(ngModel)]="greetingGroupMemberType" (ngModelChange)="onGreetingGroupTypeChange()"> Employee
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="groupMemberType" value="Contractor"
+                [(ngModel)]="greetingGroupMemberType" (ngModelChange)="onGreetingGroupTypeChange()"> Contractor
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="groupMemberType" value="Visitor"
+                [(ngModel)]="greetingGroupMemberType" (ngModelChange)="onGreetingGroupTypeChange()"> Visitor
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Groups</label>
+            <select [(ngModel)]="selectedGreetingGroupId" (ngModelChange)="onGreetingGroupSelect()">
+              <option value="">-- Select Group --</option>
+              <option *ngFor="let g of filteredGreetingGroupsByType" [value]="g.id">{{ g.groupName }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Member</label>
+            <select [(ngModel)]="selectedGreetingGroupMember" (ngModelChange)="addGreetingGroupMember()">
+              <option value="">-- Select Member --</option>
+              <option *ngFor="let m of getGreetingMemberOptions(greetingGroupMemberType)" [value]="m.id">
+                {{ m.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="chips" *ngIf="greetingGroupForm.members && greetingGroupForm.members.length > 0">
+            <span class="chip" *ngFor="let m of greetingGroupForm.members">
+              {{ m.memberName }}
+              <button class="chip-remove" (click)="removeGreetingGroupMember(m.memberId)">✕</button>
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Greeting Type</label>
+            <input type="text" [(ngModel)]="greetingGroupForm.greetingsType" placeholder="Greeting type">
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" [(ngModel)]="greetingGroupForm.greetingsDescription" placeholder="Description">
+          </div>
+
+          <!-- Status toggle -->
+          <div class="toggle-row">
+            <span class="toggle-label">Status</span>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="greetingGroupForm.status">
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-state">{{ greetingGroupForm.status ? 'Active' : 'Inactive' }}</span>
+          </div>
+
+          <!-- Time Schedule -->
+          <div class="schedule-header">
+            <span class="schedule-title">Time Schedule</span>
+            <button class="icon-btn small" title="Add Schedule" (click)="addGroupSchedule()">
+              <i class="ti ti-plus"></i>
+            </button>
+          </div>
+
+          <div class="schedule-block" *ngFor="let sch of groupSchedules; let i = index">
+            <div class="schedule-block-header">
+              <span>Schedule {{ i + 1 }}</span>
+              <button class="chip-remove" *ngIf="groupSchedules.length > 1" (click)="removeGroupSchedule(i)">✕</button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Date</label>
+                <input type="date" [(ngModel)]="sch.fromDate">
+              </div>
+              <div class="form-group">
+                <label>To Date</label>
+                <input type="date" [(ngModel)]="sch.toDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Time</label>
+                <input type="time" [(ngModel)]="sch.fromTime">
+              </div>
+              <div class="form-group">
+                <label>To Time</label>
+                <input type="time" [(ngModel)]="sch.toTime">
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- Company form -->
+        <ng-container *ngIf="popupType === 'company'">
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" [(ngModel)]="companyForm.companyName" placeholder="Company name">
+          </div>
+
+          <div class="form-group">
+            <label>Project Name</label>
+            <select [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange()">
+              <option value="">-- Select Project --</option>
+              <option *ngFor="let p of projectOptions" [value]="p.id">{{ p.projectName }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" [(ngModel)]="companyForm.description" placeholder="Description">
+          </div>
+        </ng-container>
+
+        <!-- Department form -->
+        <ng-container *ngIf="popupType === 'department'">
+          <div class="form-group">
+            <label>Department Name</label>
+            <input type="text" [(ngModel)]="departmentForm.departmentName" placeholder="Department name">
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" [(ngModel)]="departmentForm.description" placeholder="Description">
+          </div>
+        </ng-container>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

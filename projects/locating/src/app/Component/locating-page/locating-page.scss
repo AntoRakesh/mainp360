@@ -1,0 +1,280 @@
+.page-container {
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+
+  h2 { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+}
+
+// ── Split layout ──────────────────────────
+.split-layout {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tree-panel {
+  width: 30%;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #f0e8f7;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+}
+
+.map-column {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+// ── Top toolbar: select device type → select item ──
+.locating-toolbar {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #f0e8f7;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.toolbar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  max-width: 260px;
+
+  label { font-size: 11px; font-weight: 600; color: #666; }
+
+  select {
+    padding: 7px 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1a1a1a;
+    background: #fff;
+    outline: none;
+
+    &:focus { border-color: #7030a0; }
+    &:disabled { background: #f5f5f5; color: #999; cursor: not-allowed; }
+  }
+}
+
+.map-panel {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  min-height: 500px;
+
+  #locating-map, #zone-image-map, #floor-image-map {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 500px;
+  }
+
+  &.fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    border-radius: 0;
+    min-height: 100vh;
+
+    #locating-map, #zone-image-map, #floor-image-map {
+      min-height: 100vh;
+    }
+  }
+}
+
+// ── Map zoom / expand / draw / device controls ────
+.map-control-stack {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-ctrl-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s;
+
+  &:hover { background: #f5f0ff; }
+  &.active { background: #7030a0; border-color: #7030a0; }
+  &.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+  i { font-size: 16px; color: #333; }
+  img { width: 16px; height: 16px; object-fit: contain; }
+}
+
+// ── Finish-drawing hint / action ──────────
+.finish-draw-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: rgba(26, 26, 26, 0.85);
+  color: #fff;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.finish-draw-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 14px;
+  background: #7030a0;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &:not(:disabled):hover { background: #5a2680; }
+  i { font-size: 13px; }
+}
+
+// ── Fullscreen hover-to-close ──────────────
+.map-top-hover-zone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  z-index: 2050;
+}
+
+.map-close-btn {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 20px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: top 0.25s ease, opacity 0.25s ease;
+
+  i { font-size: 14px; }
+}
+
+.map-top-hover-zone:hover + .map-close-btn {
+  top: 16px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// ── Image view (floor/zone/subzone) ────────
+.map-image-view {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .no-image {
+    color: #999;
+    font-size: 13px;
+  }
+}
+
+// ── Tree ──────────────────────────────────
+.tree-container { padding: 4px 0; }
+.tree-node { margin-bottom: 2px; }
+.tree-children {
+  padding-left: 16px;
+  border-left: 1px dashed #e0c8f0;
+  margin-left: 10px;
+}
+
+.node-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #f5f0ff; }
+  &.level-0 { font-weight: 600; }
+  &.selected { background: #ede0fb; }
+}
+
+.node-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #1a1a1a;
+  flex: 1;
+  i { font-size: 14px; color: #7030a0; }
+}
+
+.empty { text-align: center; color: #999; padding: 24px; font-size: 13px; }

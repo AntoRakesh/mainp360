@@ -1,0 +1,235 @@
+<div class="create-report-container">
+  <div class="split-layout">
+
+    <!-- Left: project hierarchy (~28% width) -->
+    <div class="tree-panel">
+      <h3 class="tree-title">Project Hierarchy</h3>
+      <div class="tree-container">
+        <div class="tree-node" *ngFor="let project of projects">
+          <div class="node-row level-0">
+            <input type="checkbox" [checked]="isSelected(project.id)" (click)="toggleSelect(project.id)">
+            <div class="node-left" (click)="toggleProject(project.id)">
+              <i class="ti" [class.ti-chevron-right]="expandedProject !== project.id" [class.ti-chevron-down]="expandedProject === project.id"></i>
+              <i class="ti ti-folder"></i>
+              <span>{{ project.name }}</span>
+            </div>
+          </div>
+
+          <div class="tree-children" *ngIf="expandedProject === project.id">
+            <div class="tree-node" *ngFor="let country of project.countries">
+              <div class="node-row level-1">
+                <input type="checkbox" [checked]="isSelected(country.id)" (click)="toggleSelect(country.id)">
+                <div class="node-left" (click)="toggleCountry(country.id)">
+                  <i class="ti" [class.ti-chevron-right]="expandedCountry !== country.id" [class.ti-chevron-down]="expandedCountry === country.id"></i>
+                  <i class="ti ti-flag"></i>
+                  <span>{{ country.name }}</span>
+                </div>
+              </div>
+
+              <div class="tree-children" *ngIf="expandedCountry === country.id">
+                <div class="tree-node" *ngFor="let area of country.areas">
+                  <div class="node-row level-2">
+                    <input type="checkbox" [checked]="isSelected(area.id)" (click)="toggleSelect(area.id)">
+                    <div class="node-left" (click)="toggleArea(area.id)">
+                      <i class="ti" [class.ti-chevron-right]="expandedArea !== area.id" [class.ti-chevron-down]="expandedArea === area.id"></i>
+                      <i class="ti ti-map-pin"></i>
+                      <span>{{ area.name }}</span>
+                    </div>
+                  </div>
+
+                  <div class="tree-children" *ngIf="expandedArea === area.id">
+                    <div class="tree-node" *ngFor="let building of area.buildings">
+                      <div class="node-row level-3">
+                        <input type="checkbox" [checked]="isSelected(building.id)" (click)="toggleSelect(building.id)">
+                        <div class="node-left" (click)="toggleBuilding(building.id)">
+                          <i class="ti" [class.ti-chevron-right]="expandedBuilding !== building.id" [class.ti-chevron-down]="expandedBuilding === building.id"></i>
+                          <i class="ti ti-building"></i>
+                          <span>{{ building.name }}</span>
+                        </div>
+                      </div>
+
+                      <div class="tree-children" *ngIf="expandedBuilding === building.id">
+                        <div class="tree-node" *ngFor="let floor of building.floors">
+                          <div class="node-row level-4">
+                            <input type="checkbox" [checked]="isSelected(floor.id)" (click)="toggleSelect(floor.id)">
+                            <div class="node-left" (click)="toggleFloor(floor.id)">
+                              <i class="ti" [class.ti-chevron-right]="expandedFloor !== floor.id" [class.ti-chevron-down]="expandedFloor === floor.id"></i>
+                              <i class="ti ti-stack-2"></i>
+                              <span>{{ floor.name }}</span>
+                            </div>
+                          </div>
+
+                          <div class="tree-children" *ngIf="expandedFloor === floor.id">
+                            <div class="tree-node" *ngFor="let zone of floor.zones">
+                              <div class="node-row level-5">
+                                <input type="checkbox" [checked]="isSelected(zone.id)" (click)="toggleSelect(zone.id)">
+                                <div class="node-left">
+                                  <i class="ti ti-map"></i>
+                                  <span>{{ zone.name }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: form -->
+    <div class="form-panel">
+      <h2 class="new-report-heading">New Report</h2>
+
+      <div class="status-strip">
+        <div class="status-item">
+          <span class="status-label">Connection Status</span>
+          <span class="status-value" [class.online]="connectionOnline" [class.offline]="!connectionOnline">
+            <i class="dot"></i>{{ connectionOnline ? 'Online' : 'Offline' }}
+          </span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Total Gateway</span>
+          <span class="status-value">{{ totalGateway }}</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Fixed Sensors</span>
+          <span class="status-value">{{ fixedSensors }}</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Mobile Sensors (Trackers)</span>
+          <span class="status-value">{{ mobileSensors }}</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Alarms</span>
+          <span class="status-value">{{ alarms }}</span>
+        </div>
+      </div>
+
+      <h3 class="section-heading">Create Reports</h3>
+
+      <div class="form-group">
+        <label>Time Range</label>
+        <div class="pill-group">
+          <button type="button" class="pill" *ngFor="let opt of timeRangeOptions"
+            [class.active]="timeRange === opt" (click)="timeRange = opt">{{ opt }}</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Report Name</label>
+        <input type="text" [(ngModel)]="reportName" name="reportName" placeholder="Report Name">
+      </div>
+
+      <div class="form-group">
+        <label>Select Module</label>
+        <div class="checkbox-grid">
+          <label class="checkbox-option" *ngFor="let mod of moduleOptions">
+            <input type="checkbox" [checked]="isModuleSelected(mod)" (change)="toggleModule(mod)">
+            <span>{{ mod }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Select Template</label>
+        <table class="template-table">
+          <thead>
+            <tr>
+              <th>Select Template</th>
+              <th></th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of templateRows; let i = index">
+              <td>
+                <select [(ngModel)]="row.template" [name]="'template-' + i">
+                  <option value="" disabled>Select template</option>
+                  <option *ngFor="let t of templateOptions" [value]="t">{{ t }}</option>
+                </select>
+              </td>
+              <td>
+                <input type="text" [(ngModel)]="row.value" [name]="'value-' + i" placeholder="Value">
+              </td>
+              <td class="template-actions">
+                <button type="button" class="icon-btn small" title="Add row" (click)="addTemplateRow()">
+                  <i class="ti ti-plus"></i>
+                </button>
+                <button type="button" class="icon-btn small danger" title="Remove row"
+                  [disabled]="templateRows.length === 1" (click)="removeTemplateRow(i)">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-group">
+        <label>Choose Format</label>
+        <div class="checkbox-row">
+          <label class="checkbox-option" *ngFor="let f of formatOptions">
+            <input type="checkbox" [checked]="format === f" (change)="selectFormat(f)">
+            <span>{{ f }}</span>
+          </label>
+        </div>
+        <label class="checkbox-option">
+          <input type="checkbox" [(ngModel)]="downloadRawCsv" name="downloadRawCsv">
+          <span>Also download raw data in CSV Format</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Recurrence of Report</label>
+        <div class="checkbox-row">
+          <label class="checkbox-option" *ngFor="let r of recurrenceOptions">
+            <input type="checkbox" [checked]="recurrence === r.value" (change)="selectRecurrence(r.value)">
+            <span>{{ r.label }}</span>
+          </label>
+        </div>
+
+        <div class="recurrence-detail" *ngIf="recurrence === 'Daily'">
+          <input type="time" [(ngModel)]="dailyTime" name="dailyTime">
+        </div>
+
+        <div class="recurrence-detail" *ngIf="recurrence === 'Weekly'">
+          <select [(ngModel)]="weeklyDay" name="weeklyDay">
+            <option *ngFor="let d of weekDays" [value]="d">{{ d }}</option>
+          </select>
+          <span class="at-label">at</span>
+          <input type="time" [(ngModel)]="weeklyTime" name="weeklyTime">
+        </div>
+
+        <div class="recurrence-detail" *ngIf="recurrence === 'Monthly'">
+          <input type="date" [(ngModel)]="monthlyDate" name="monthlyDate">
+          <span class="at-label">at</span>
+          <input type="time" [(ngModel)]="monthlyTime" name="monthlyTime">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Share With</label>
+        <div class="email-input-wrapper">
+          <span class="email-chip" *ngFor="let email of shareWithEmails; let i = index">
+            {{ email }}
+            <button type="button" class="chip-remove" (click)="removeEmail(i)">&times;</button>
+          </span>
+          <input type="text" [(ngModel)]="emailInput" name="emailInput"
+            placeholder="Enter comma to separate email address"
+            (keydown)="onEmailKeydown($event)" (blur)="commitEmailInput()">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+        <button type="button" class="btn-save" (click)="generateReport()">Generate Report</button>
+      </div>
+    </div>
+  </div>
+</div>

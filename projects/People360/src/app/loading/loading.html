@@ -1,0 +1,24 @@
+@if (loading()) {
+  <div class="loading-overlay">
+    <div
+      class="tile-grid"
+      [style.width.px]="logoSize"
+      [style.height.px]="logoSize"
+    >
+      @for (tile of tiles; track tile.key) {
+        <div
+          class="tile"
+          [style.width.px]="tileSize"
+          [style.height.px]="tileSize"
+          [style.background-image]="'url(' + logoUrl + ')'"
+          [style.background-position]="tile.bgPosition"
+          [style.background-size.px]="logoSize"
+          [style.--dx.px]="tile.dx"
+          [style.--dy.px]="tile.dy"
+          [style.animation-delay.ms]="tile.delay"
+        ></div>
+      }
+    </div>
+    <span class="loading-text">Loading</span>
+  </div>
+}

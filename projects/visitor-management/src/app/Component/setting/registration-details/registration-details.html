@@ -1,0 +1,159 @@
+<div class="registration-details-panel">
+  <div class="sub-tabs">
+    <button
+      type="button"
+      class="sub-tab"
+      *ngFor="let tab of subTabs"
+      [class.active]="activeSubTab === tab.key"
+      (click)="selectSubTab(tab.key)">
+      {{ tab.label }}
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrapper" *ngIf="!loading" (scroll)="closeActionMenu()">
+    <table class="data-table" *ngIf="activeSubTab === 'Individual'">
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Mobile No</th>
+          <th>Email Id</th>
+          <th>ID Type</th>
+          <th>ID No</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items; let i = index">
+          <td>{{ item.firstName || '-' }}</td>
+          <td>{{ item.lastName || '-' }}</td>
+          <td>{{ item.mobileNo || '-' }}</td>
+          <td>{{ item.email || '-' }}</td>
+          <td>{{ item.idType || '-' }}</td>
+          <td>{{ item.idNo || '-' }}</td>
+          <td>{{ item.status || '-' }}</td>
+          <td class="actions">
+            <button type="button" class="action-toggle" (click)="toggleActionMenu(i, $event)">
+              Option <i class="ti ti-chevron-down"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="8" class="no-data">No individual registrations found</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="data-table" *ngIf="activeSubTab === 'Company'">
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Mobile No</th>
+          <th>Email Id</th>
+          <th>Company Name</th>
+          <th>Contact Name</th>
+          <th>Contact Number</th>
+          <th>Company Email ID</th>
+          <th>Trade License Number</th>
+          <th>Trade License Expiry Date</th>
+          <th>ID Type</th>
+          <th>ID No</th>
+          <th>Document Type</th>
+          <th>Document Number</th>
+          <th>Expires On</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items; let i = index">
+          <td>{{ item.firstName || '-' }}</td>
+          <td>{{ item.lastName || '-' }}</td>
+          <td>{{ item.mobileNo || '-' }}</td>
+          <td>{{ item.email || '-' }}</td>
+          <td>{{ item.companyName || '-' }}</td>
+          <td>{{ item.contactName || '-' }}</td>
+          <td>{{ item.contactNumber || '-' }}</td>
+          <td>{{ item.companyEmailId || '-' }}</td>
+          <td>{{ item.tradeLicenseNumber || '-' }}</td>
+          <td>{{ item.tradeLicenseExpiryDate ? (item.tradeLicenseExpiryDate | date: 'mediumDate') : '-' }}</td>
+          <td>{{ item.idType || '-' }}</td>
+          <td>{{ item.idNo || '-' }}</td>
+          <td>{{ item.documentType || '-' }}</td>
+          <td>{{ item.documentNumber || '-' }}</td>
+          <td>{{ item.expiresOn ? (item.expiresOn | date: 'mediumDate') : '-' }}</td>
+          <td>{{ item.status || '-' }}</td>
+          <td class="actions">
+            <button type="button" class="action-toggle" (click)="toggleActionMenu(i, $event)">
+              Option <i class="ti ti-chevron-down"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="17" class="no-data">No company registrations found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div
+    class="action-menu"
+    *ngIf="openActionRowIndex !== null"
+    [style.top.px]="menuPosition?.top"
+    [style.left.px]="menuPosition?.left"
+    (click)="$event.stopPropagation()">
+    <button type="button" (click)="openView(items[openActionRowIndex!])">View</button>
+    <button type="button" (click)="deleteItem(items[openActionRowIndex!])">Delete</button>
+    <button type="button" (click)="block(items[openActionRowIndex!])">Block</button>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showViewPopup" (click)="closeViewPopup()">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Registration Details</h3>
+        <button type="button" class="popup-close" (click)="closeViewPopup()">✕</button>
+      </div>
+
+      <div class="popup-body" *ngIf="viewItem">
+        <div class="view-row"><span class="view-label">First Name :</span><span>{{ viewItem.firstName || '-' }}</span></div>
+        <div class="view-row"><span class="view-label">Mobile No :</span><span>{{ viewItem.mobileNo || '-' }}</span></div>
+        <div class="view-row"><span class="view-label">ID Type :</span><span>{{ viewItem.idType || '-' }}</span></div>
+        <div class="view-row"><span class="view-label">Last Name :</span><span>{{ viewItem.lastName || '-' }}</span></div>
+        <div class="view-row"><span class="view-label">Email ID :</span><span>{{ viewItem.email || '-' }}</span></div>
+        <div class="view-row"><span class="view-label">ID No :</span><span>{{ viewItem.idNo || '-' }}</span></div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="closeViewPopup()" [disabled]="approving">Close</button>
+        <button type="button" class="btn-save" *ngIf="viewItem?.status === 'Pending' || viewItem?.status === 'Blocked'" (click)="approve()" [disabled]="approving">
+          {{ approving ? 'Approving...' : 'Approve' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="approving" text="Approving"></lib-popup-loader>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this registration? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button type="button" class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+</div>

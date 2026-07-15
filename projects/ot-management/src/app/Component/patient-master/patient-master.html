@@ -1,0 +1,159 @@
+<div class="patient-master-container">
+  <!-- Top row -->
+  <div class="top-row">
+    <h2>Patient Master</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" title="Add" (click)="openAdd()">
+        <img [src]="otManagementUrl + '/assets/icons/add.png'" alt="add">
+      </button>
+      <button class="icon-btn" title="Reload" (click)="loadPatients()">
+        <img [src]="otManagementUrl + '/assets/icons/reload.png'" alt="reload">
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>HIS ID</th>
+          <th>Patient Name</th>
+          <th>Gender</th>
+          <th>Case ID</th>
+          <th>Department</th>
+          <th>Priority</th>
+          <th>Surgery Type</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredPatients; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ p.hisId }}</td>
+          <td>{{ p.patientName }}</td>
+          <td>{{ p.gender }}</td>
+          <td>{{ p.caseId }}</td>
+          <td>{{ p.department }}</td>
+          <td>{{ p.priority }}</td>
+          <td>{{ p.surgeryType }}</td>
+          <td><span class="badge" [class.active]="p.status">{{ p.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(p)">
+              <img [src]="otManagementUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(p.id!)">
+              <img [src]="otManagementUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredPatients.length === 0">
+          <td colspan="10" class="no-data">No patients found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit' : 'Add' }} Patient</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>HIS ID</label>
+            <input type="text" [(ngModel)]="form.hisId" [disabled]="isEdit" placeholder="Enter HIS ID">
+          </div>
+          <div class="form-group">
+            <label>Patient Name</label>
+            <input type="text" [(ngModel)]="form.patientName" placeholder="Enter patient name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select [(ngModel)]="form.gender">
+              <option value="">-- Select Gender --</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Case ID</label>
+            <input type="text" [(ngModel)]="form.caseId" placeholder="Enter case ID">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Department</label>
+            <input type="text" [(ngModel)]="form.department" placeholder="Enter department">
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <input type="text" [(ngModel)]="form.priority" placeholder="Enter priority">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Surgery Type</label>
+          <input type="text" [(ngModel)]="form.surgeryType" placeholder="Enter surgery type">
+        </div>
+
+        <div class="toggle-row">
+          <span class="toggle-label">Status</span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="form.status">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-state">{{ form.status ? 'Active' : 'Inactive' }}</span>
+        </div>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,477 @@
+<div class="page-container">
+  <!-- Page header -->
+  <div class="page-header">
+    <h2>Projects</h2>
+    <button class="btn-add" (click)="openAdd('project')">+ Add Project</button>
+  </div>
+
+  <!-- Split layout -->
+  <div class="split-layout">
+
+    <!-- Left: Tree (30%) -->
+    <div class="tree-panel">
+      <div class="tree-container">
+
+        <div class="tree-node" *ngFor="let project of projects">
+          <div class="node-row level-0" [class.active]="isActiveNode('project', project.id!)">
+            <div class="node-left" (click)="toggleProject(project.id!)">
+              <i class="ti" [class.ti-chevron-right]="expandedProject !== project.id"
+                [class.ti-chevron-down]="expandedProject === project.id"></i>
+              <i class="ti ti-folder"></i>
+              <span>{{ project.projectName }}</span>
+            </div>
+            <div class="node-actions">
+              <button class="icon-btn" title="Add Country" (click)="openAdd('country', {projectId: project.id})"><i
+                  class="ti ti-plus"></i></button>
+              <button class="icon-btn" title="Edit" (click)="openEdit('project', project)"><i
+                  class="ti ti-edit"></i></button>
+              <button class="icon-btn danger" title="Delete" (click)="delete('project', project.id!)"><i
+                  class="ti ti-trash"></i></button>
+            </div>
+          </div>
+
+          <!-- Countries -->
+          <div class="tree-children" *ngIf="expandedProject === project.id">
+            <div class="tree-node" *ngFor="let country of getCountries(project.id!)">
+              <div class="node-row level-1" [class.active]="isActiveNode('country', country.id!)">
+                <div class="node-left"
+                  (click)="toggleCountry(country.id!)">
+                  <i class="ti" [class.ti-chevron-right]="expandedCountry !== country.id"
+                    [class.ti-chevron-down]="expandedCountry === country.id"></i>
+                  <i class="ti ti-flag"></i>
+                  <span>{{ country.countryName }}</span>
+                </div>
+                <div class="node-actions">
+                  <button class="icon-btn" title="Add Area"
+                    (click)="openAdd('area', {projectId: project.id, countryId: country.id})"><i
+                      class="ti ti-plus"></i></button>
+                  <button class="icon-btn" title="Edit" (click)="openEdit('country', country)"><i
+                      class="ti ti-edit"></i></button>
+                  <button class="icon-btn danger" title="Delete" (click)="delete('country', country.id!)"><i
+                      class="ti ti-trash"></i></button>
+                </div>
+              </div>
+
+              <!-- Areas -->
+              <div class="tree-children" *ngIf="expandedCountry === country.id">
+                <div class="tree-node" *ngFor="let area of getAreas(country.id!)">
+                  <div class="node-row level-2" [class.active]="isActiveNode('area', area.id!)">
+                    <div class="node-left" (click)="toggleArea(area.id!)">
+                      <i class="ti" [class.ti-chevron-right]="expandedArea !== area.id"
+                        [class.ti-chevron-down]="expandedArea === area.id"></i>
+                      <i class="ti ti-map"></i>
+                      <span>{{ area.areaName }}</span>
+                    </div>
+                    <div class="node-actions">
+                      <button class="icon-btn" title="Add Building"
+                        (click)="openAdd('building', {projectId: project.id, countryId: country.id, areaId: area.id})"><i
+                          class="ti ti-plus"></i></button>
+                      <button class="icon-btn" title="Edit" (click)="openEdit('area', area)"><i
+                          class="ti ti-edit"></i></button>
+                      <button class="icon-btn danger" title="Delete" (click)="delete('area', area.id!)"><i
+                          class="ti ti-trash"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Buildings -->
+                  <div class="tree-children" *ngIf="expandedArea === area.id">
+                    <div class="tree-node" *ngFor="let building of getBuildings(area.id!)">
+                      <div class="node-row level-3" [class.active]="isActiveNode('building', building.id!)">
+                        <div class="node-left"
+                          (click)="toggleBuilding(building.id!)">
+                          <i class="ti" [class.ti-chevron-right]="expandedBuilding !== building.id"
+                            [class.ti-chevron-down]="expandedBuilding === building.id"></i>
+                          <i class="ti ti-building"></i>
+                          <span>{{ building.buildingName }}</span>
+                        </div>
+                        <div class="node-actions">
+                          <button class="icon-btn" title="Add Floor"
+                            (click)="openAdd('floor', {projectId: project.id, countryId: country.id, areaId: area.id, buildingId: building.id})"><i
+                              class="ti ti-plus"></i></button>
+                          <button class="icon-btn" title="Edit" (click)="openEdit('building', building)"><i
+                              class="ti ti-edit"></i></button>
+                          <button class="icon-btn danger" title="Delete" (click)="delete('building', building.id!)"><i
+                              class="ti ti-trash"></i></button>
+                        </div>
+                      </div>
+
+                      <!-- Floors -->
+                      <div class="tree-children" *ngIf="expandedBuilding === building.id">
+                        <div class="tree-node" *ngFor="let floor of getFloors(building.id!)">
+                          <div class="node-row level-4" [class.active]="isActiveNode('floor', floor.id!)">
+                            <div class="node-left" (click)="toggleFloor(floor.id!)">
+                              <i class="ti" [class.ti-chevron-right]="expandedFloor !== floor.id"
+                                [class.ti-chevron-down]="expandedFloor === floor.id"></i>
+                              <i class="ti ti-stairs"></i>
+                              <span>{{ floor.floorName }}</span>
+                            </div>
+                            <div class="node-actions">
+                              <button class="icon-btn" title="Add Zone"
+                                (click)="openAdd('zone', {projectId: project.id, countryId: country.id, areaId: area.id, buildingId: building.id, floorId: floor.id})"><i
+                                  class="ti ti-plus"></i></button>
+                              <button class="icon-btn" title="Edit" (click)="openEdit('floor', floor)"><i
+                                  class="ti ti-edit"></i></button>
+                              <button class="icon-btn danger" title="Delete" (click)="delete('floor', floor.id!)"><i
+                                  class="ti ti-trash"></i></button>
+                            </div>
+                          </div>
+
+                          <!-- Zones -->
+                          <div class="tree-children" *ngIf="expandedFloor === floor.id">
+                            <div class="tree-node" *ngFor="let zone of getZones(floor.id!)">
+                              <div class="node-row level-5" [class.active]="isActiveNode('zone', zone.id!)">
+                                <div class="node-left" (click)="toggleZone(zone.id!)">
+                                  <i class="ti" [class.ti-chevron-right]="expandedZone !== zone.id"
+                                    [class.ti-chevron-down]="expandedZone === zone.id"></i>
+                                  <i class="ti ti-border-all"></i>
+                                  <span>{{ zone.zoneName }}</span>
+                                </div>
+                                <div class="node-actions">
+                                  <button class="icon-btn" title="Add SubZone"
+                                    (click)="openAdd('subzone', {projectId: project.id, countryId: country.id, areaId: area.id, buildingId: building.id, floorId: floor.id, zoneId: zone.id})"><i
+                                      class="ti ti-plus"></i></button>
+                                  <button class="icon-btn" title="Edit" (click)="openEdit('zone', zone)"><i
+                                      class="ti ti-edit"></i></button>
+                                  <button class="icon-btn danger" title="Delete" (click)="delete('zone', zone.id!)"><i
+                                      class="ti ti-trash"></i></button>
+                                </div>
+                              </div>
+
+                              <!-- SubZones -->
+                              <div class="tree-children" *ngIf="expandedZone === zone.id">
+                                <div class="tree-node" *ngFor="let sub of getSubZones(zone.id!)">
+                                  <div class="node-row level-6" [class.active]="isActiveNode('subzone', sub.id!)">
+                                    <div class="node-left" (click)="toggleSubZone(sub.id!)">
+                                      <i class="ti ti-point"></i>
+                                      <span>{{ sub.subZoneName }}</span>
+                                    </div>
+                                    <div class="node-actions">
+                                      <button class="icon-btn" title="Edit" (click)="openEdit('subzone', sub)"><i
+                                          class="ti ti-edit"></i></button>
+                                      <button class="icon-btn danger" title="Delete"
+                                        (click)="delete('subzone', sub.id!)"><i class="ti ti-trash"></i></button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty" *ngIf="projects.length === 0">No projects found. Click "+ Add Project" to start.</div>
+      </div>
+    </div>
+
+    <!-- Right: Map / Image (70%) -->
+    <div class="map-panel">
+      <div id="project-map" [class.hidden]="showingImage"></div>
+      <div class="image-panel" *ngIf="showingImage">
+        <div class="image-panel-header">
+          <span>{{ currentImageLabel }}</span>
+        </div>
+        <div class="image-panel-body">
+          <img [src]="currentImagePath" [alt]="currentImageLabel">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ popupTitle }}</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <ng-container *ngIf="popupType === 'project'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Project Name</label>
+              <input type="text" [(ngModel)]="projectForm.projectName" placeholder="Project name"
+                [class.invalid]="isInvalid(projectForm.projectName)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="projectForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(projectForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Week Start</label>
+              <input type="date" [(ngModel)]="projectForm.weekStart" [min]="!isEdit ? todayDateStr : null"
+                [class.invalid]="isInvalid(projectForm.weekStart) || dateError === 'start' || dateError === 'both'">
+            </div>
+            <div class="form-group">
+              <label>Week End</label>
+              <input type="date" [(ngModel)]="projectForm.weekEnd" [min]="projectForm.weekStart || null"
+                [class.invalid]="isInvalid(projectForm.weekEnd) || dateError === 'end' || dateError === 'both'">
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'country'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Country Name</label>
+              <input type="text" [(ngModel)]="countryForm.countryName" placeholder="Country name"
+                [class.invalid]="isInvalid(countryForm.countryName)">
+            </div>
+            <div class="form-group">
+              <label>Country Code</label>
+              <input type="text" [(ngModel)]="countryForm.countryCode" placeholder="Country code"
+                [class.invalid]="isInvalid(countryForm.countryCode)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Time Zone</label>
+              <input type="text" [(ngModel)]="countryForm.timeZone" placeholder="Time zone"
+                [class.invalid]="isInvalid(countryForm.timeZone)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="countryForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(countryForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Latitude</label>
+              <input type="text" [(ngModel)]="countryForm.latitude" placeholder="Latitude"
+                [class.invalid]="isInvalid(countryForm.latitude)">
+            </div>
+            <div class="form-group">
+              <label>Longitude</label>
+              <input type="text" [(ngModel)]="countryForm.longitude" placeholder="Longitude"
+                [class.invalid]="isInvalid(countryForm.longitude)">
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'area'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Area Name</label>
+              <input type="text" [(ngModel)]="areaForm.areaName" placeholder="Area name"
+                [class.invalid]="isInvalid(areaForm.areaName)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="areaForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(areaForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Latitude</label>
+              <input type="text" [(ngModel)]="areaForm.latitude" placeholder="Latitude"
+                [class.invalid]="isInvalid(areaForm.latitude)">
+            </div>
+            <div class="form-group">
+              <label>Longitude</label>
+              <input type="text" [(ngModel)]="areaForm.longitude" placeholder="Longitude"
+                [class.invalid]="isInvalid(areaForm.longitude)">
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'building'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Building Name</label>
+              <input type="text" [(ngModel)]="buildingForm.buildingName" placeholder="Building name"
+                [class.invalid]="isInvalid(buildingForm.buildingName)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="buildingForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(buildingForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Latitude</label>
+              <input type="text" [(ngModel)]="buildingForm.latitude" placeholder="Latitude"
+                [class.invalid]="isInvalid(buildingForm.latitude)">
+            </div>
+            <div class="form-group">
+              <label>Longitude</label>
+              <input type="text" [(ngModel)]="buildingForm.longitude" placeholder="Longitude"
+                [class.invalid]="isInvalid(buildingForm.longitude)">
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'floor'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Floor Name</label>
+              <input type="text" [(ngModel)]="floorForm.floorName" placeholder="Floor name"
+                [class.invalid]="isInvalid(floorForm.floorName)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="floorForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(floorForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group map-path-group">
+              <label>Map Path</label>
+              <div class="map-upload">
+                <button type="button" class="btn-upload" (click)="floorMapInput.click()">
+                  <i class="ti ti-upload"></i> Upload Image
+                </button>
+                <input #floorMapInput type="file" accept="image/*" hidden (change)="onMapPathSelected($event)">
+              </div>
+              <div class="map-preview" *ngIf="pendingMapPreview || floorForm.mapPath">
+                <img [src]="pendingMapPreview || floorForm.mapPath" alt="Map preview">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'zone'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Zone Name</label>
+              <input type="text" [(ngModel)]="zoneForm.zoneName" placeholder="Zone name"
+                [class.invalid]="isInvalid(zoneForm.zoneName)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="zoneForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(zoneForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Priority</label>
+              <input type="text" [(ngModel)]="zoneForm.priority" placeholder="Priority"
+                [class.invalid]="isInvalid(zoneForm.priority)">
+            </div>
+            <div class="form-group">
+              <label>Time Taken (mins)</label>
+              <input type="number" [(ngModel)]="zoneForm.timeTakenAssemblePoint"
+                [class.invalid]="isInvalid(zoneForm.timeTakenAssemblePoint)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" [(ngModel)]="zoneForm.musterPoint"> Muster Point</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" [(ngModel)]="zoneForm.exitPoint"> Exit Point</label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group map-path-group">
+              <label>Map Path</label>
+              <div class="map-upload">
+                <button type="button" class="btn-upload" (click)="zoneMapInput.click()">
+                  <i class="ti ti-upload"></i> Upload Image
+                </button>
+                <input #zoneMapInput type="file" accept="image/*" hidden (change)="onMapPathSelected($event)">
+              </div>
+              <div class="map-preview" *ngIf="pendingMapPreview || zoneForm.mapPath">
+                <img [src]="pendingMapPreview || zoneForm.mapPath" alt="Map preview">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="popupType === 'subzone'">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Sub Zone Name</label>
+              <input type="text" [(ngModel)]="subZoneForm.subZoneName" placeholder="Sub zone name"
+                [class.invalid]="isInvalid(subZoneForm.subZoneName)">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" [(ngModel)]="subZoneForm.description" placeholder="Description"
+                [class.invalid]="isInvalid(subZoneForm.description)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Priority</label>
+              <input type="number" [(ngModel)]="subZoneForm.priority"
+                [class.invalid]="isInvalid(subZoneForm.priority)">
+            </div>
+            <div class="form-group">
+              <label>Time Taken (mins)</label>
+              <input type="number" [(ngModel)]="subZoneForm.timeTakenAssemblePoint"
+                [class.invalid]="isInvalid(subZoneForm.timeTakenAssemblePoint)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" [(ngModel)]="subZoneForm.assemblyPoint"> Assembly Point</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" [(ngModel)]="subZoneForm.exit"> Exit</label>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group map-path-group">
+              <label>Map Path</label>
+              <div class="map-upload">
+                <button type="button" class="btn-upload" (click)="subZoneMapInput.click()">
+                  <i class="ti ti-upload"></i> Upload Image
+                </button>
+                <input #subZoneMapInput type="file" accept="image/*" hidden (change)="onMapPathSelected($event)">
+              </div>
+              <div class="map-preview" *ngIf="pendingMapPreview || subZoneForm.mapPath">
+                <img [src]="pendingMapPreview || subZoneForm.mapPath" alt="Map preview">
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>

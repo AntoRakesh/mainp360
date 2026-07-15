@@ -1,0 +1,153 @@
+<div class="settings-page">
+  <div class="settings-header">
+    <h2>Settings</h2>
+
+    <div class="tabs">
+      <button
+        type="button"
+        class="tab"
+        *ngFor="let tab of tabs"
+        [class.active]="activeTab === tab.key"
+        (click)="selectTab(tab.key)">
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="settings-body" *ngIf="!loading">
+    <div class="visitor-panel-summary" *ngIf="activeTab === 'visitorPanel'">
+      <ng-container *ngIf="settingId; else noSettingData">
+        <div class="summary-card">
+          <div class="summary-card-header">
+            <h3>Visitor Panel Details</h3>
+            <button type="button" class="icon-btn" title="Edit" (click)="openEdit()">
+              <i class="ti ti-pencil"></i> Edit
+            </button>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">Visitor Panel Name</span>
+              <span class="summary-value">{{ form.visitorPanelName || '-' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Company Name</span>
+              <span class="summary-value">{{ form.companyName || '-' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Auth Code</span>
+              <span class="summary-value">{{ form.isAuthCode ? 'Enabled' : 'Disabled' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Approved</span>
+              <span class="summary-value">{{ form.isApproved ? 'Enabled' : 'Disabled' }}</span>
+            </div>
+          </div>
+
+          <div class="summary-images">
+            <div class="summary-image" *ngIf="form.backgroundImg">
+              <span class="summary-label">Background Image</span>
+              <img [src]="form.backgroundImg" alt="Background preview">
+            </div>
+            <div class="summary-image" *ngIf="form.logo">
+              <span class="summary-label">Logo</span>
+              <img [src]="form.logo" alt="Logo preview">
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noSettingData>
+        <div class="tab-placeholder">
+          <p>No visitor panel settings found.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="popup-overlay" *ngIf="showEditPopup">
+      <div class="popup" (click)="$event.stopPropagation()">
+        <div class="popup-header">
+          <h3>Edit Visitor Panel</h3>
+          <button type="button" class="popup-close" (click)="closeEdit()">✕</button>
+        </div>
+
+        <div class="popup-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Visitor Panel Name</label>
+              <input type="text" [(ngModel)]="editForm.visitorPanelName" name="visitorPanelName" placeholder="Visitor panel name">
+            </div>
+            <div class="form-group">
+              <label>Company Name</label>
+              <input type="text" [(ngModel)]="editForm.companyName" name="companyName" placeholder="Company name">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" [(ngModel)]="editForm.isAuthCode" name="isAuthCode"> Auth Code</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <label><input type="checkbox" [(ngModel)]="editForm.isApproved" name="isApproved"> Approved</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group image-group">
+              <label>Background Image</label>
+              <div class="image-upload">
+                <button type="button" class="btn-upload" (click)="backgroundInput.click()" [disabled]="uploadingBackground">
+                  <i class="ti ti-upload"></i> {{ uploadingBackground ? 'Uploading...' : 'Upload Background' }}
+                </button>
+                <input #backgroundInput type="file" accept="image/*" hidden (change)="onBackgroundSelected($event)">
+              </div>
+              <div class="image-preview" *ngIf="editForm.backgroundImg">
+                <img [src]="editForm.backgroundImg" alt="Background preview">
+              </div>
+            </div>
+
+            <div class="form-group image-group">
+              <label>Logo</label>
+              <div class="image-upload">
+                <button type="button" class="btn-upload" (click)="logoInput.click()" [disabled]="uploadingLogo">
+                  <i class="ti ti-upload"></i> {{ uploadingLogo ? 'Uploading...' : 'Upload Logo' }}
+                </button>
+                <input #logoInput type="file" accept="image/*" hidden (change)="onLogoSelected($event)">
+              </div>
+              <div class="image-preview" *ngIf="editForm.logo">
+                <img [src]="editForm.logo" alt="Logo preview">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="popup-footer">
+          <button type="button" class="btn-cancel" (click)="closeEdit()">Cancel</button>
+          <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+
+        <lib-popup-loader *ngIf="saving" text="Saving"></lib-popup-loader>
+      </div>
+    </div>
+
+    <app-approval *ngIf="activeTab === 'approval'"></app-approval>
+
+    <app-entry-exit *ngIf="activeTab === 'entryExit'"></app-entry-exit>
+
+    <app-reconcile-pass *ngIf="activeTab === 'reconcilePass'"></app-reconcile-pass>
+
+    <app-identification *ngIf="activeTab === 'identification'"></app-identification>
+
+    <app-permit *ngIf="activeTab === 'permit'"></app-permit>
+
+    <app-registration-details *ngIf="activeTab === 'registrationDetails'"></app-registration-details>
+
+    <div class="tab-placeholder" *ngIf="activeTab !== 'visitorPanel' && activeTab !== 'approval' && activeTab !== 'entryExit' && activeTab !== 'reconcilePass' && activeTab !== 'identification' && activeTab !== 'permit' && activeTab !== 'registrationDetails'">
+      <p>{{ activeTabLabel }} settings coming soon.</p>
+    </div>
+  </div>
+</div>

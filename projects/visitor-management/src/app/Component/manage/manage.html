@@ -1,0 +1,22 @@
+<div class="manage-page">
+  <div class="manage-header">
+    <h2>Manage Permits</h2>
+
+    <div class="tabs">
+      <button
+        type="button"
+        class="tab"
+        *ngFor="let tab of tabs"
+        [class.active]="activeTab === tab.key"
+        (click)="selectTab(tab.key)">
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+
+  <div class="manage-body">
+    <app-visitor-permit *ngIf="activeTab === 'visitor'"></app-visitor-permit>
+    <app-material-permit *ngIf="activeTab === 'material'"></app-material-permit>
+    <app-exit-permit *ngIf="activeTab === 'exit'"></app-exit-permit>
+  </div>
+</div>

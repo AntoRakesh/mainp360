@@ -1,0 +1,135 @@
+<div class="create-container">
+
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="cancel()">
+        <i class="ti ti-arrow-left"></i>
+      </button>
+      <h2>Edit Device</h2>
+    </div>
+    <div class="header-actions">
+      <button class="btn-cancel" (click)="cancel()">Cancel</button>
+      <button class="btn-save" (click)="save()" [disabled]="saving || loading">
+        {{ saving ? 'Saving...' : 'Save' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-msg" *ngIf="loading">Loading device...</div>
+
+  <div class="form-container" *ngIf="!loading">
+
+    <div class="section">
+      <div class="section-title">Basic Information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Device Name</label>
+          <input type="text" [(ngModel)]="form.mydeviceName" placeholder="Device name"
+            [class.invalid]="isInvalid(form.mydeviceName)">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <input type="text" [(ngModel)]="form.type" placeholder="Device type"
+            [class.invalid]="isInvalid(form.type)">
+        </div>
+        <div class="form-group">
+          <label>Unique ID</label>
+          <input type="text" [(ngModel)]="form.uniqueId" placeholder="Unique ID"
+            [class.invalid]="isInvalid(form.uniqueId)">
+        </div>
+        <div class="form-group">
+          <label>Model ID</label>
+          <input type="text" [(ngModel)]="form.modelId" placeholder="Model ID"
+            [class.invalid]="isInvalid(form.modelId)">
+        </div>
+        <div class="form-group">
+          <label>Technology</label>
+          <input type="text" [(ngModel)]="form.technology" placeholder="Technology"
+            [class.invalid]="isInvalid(form.technology)">
+        </div>
+        <div class="form-group">
+          <label>Reference ID</label>
+          <input type="text" [(ngModel)]="form.referenceId" placeholder="Reference ID"
+            [class.invalid]="isInvalid(form.referenceId)">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" [(ngModel)]="form.description" placeholder="Description"
+            [class.invalid]="isInvalid(form.description)">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Location</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Project</label>
+          <select [(ngModel)]="form.projectId" (ngModelChange)="onProjectChange()"
+            [class.invalid]="isInvalid(form.projectId)">
+            <option value="">-- Select Project --</option>
+            <option *ngFor="let p of projects" [value]="p.id">{{ p.projectName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <select [(ngModel)]="form.countryId" (ngModelChange)="onCountryChange()" [disabled]="!form.projectId"
+            [class.invalid]="isInvalid(form.countryId)">
+            <option value="">-- Select Country --</option>
+            <option *ngFor="let c of filteredCountries" [value]="c.id">{{ c.countryName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Area</label>
+          <select [(ngModel)]="form.areaId" (ngModelChange)="onAreaChange()" [disabled]="!form.countryId"
+            [class.invalid]="isInvalid(form.areaId)">
+            <option value="">-- Select Area --</option>
+            <option *ngFor="let a of filteredAreas" [value]="a.id">{{ a.areaName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Building</label>
+          <select [(ngModel)]="form.buildingId" (ngModelChange)="onBuildingChange()" [disabled]="!form.areaId"
+            [class.invalid]="isInvalid(form.buildingId)">
+            <option value="">-- Select Building --</option>
+            <option *ngFor="let b of filteredBuildings" [value]="b.id">{{ b.buildingName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Floor</label>
+          <select [(ngModel)]="form.floorId" (ngModelChange)="onFloorChange()" [disabled]="!form.buildingId"
+            [class.invalid]="isInvalid(form.floorId)">
+            <option value="">-- Select Floor --</option>
+            <option *ngFor="let f of filteredFloors" [value]="f.id">{{ f.floorName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Zone</label>
+          <select [(ngModel)]="form.zoneId" (ngModelChange)="onZoneChange()" [disabled]="!form.floorId"
+            [class.invalid]="isInvalid(form.zoneId)">
+            <option value="">-- Select Zone --</option>
+            <option *ngFor="let z of filteredZones" [value]="z.id">{{ z.zoneName }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Additional Fields</div>
+      <div class="form-grid">
+        <div class="form-group" *ngFor="let n of [1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]">
+          <label>Flexi {{ n }}</label>
+          <input type="text" [(ngModel)]="form['flexi' + n]" [placeholder]="'Flexi ' + n">
+        </div>
+        <div class="form-group">
+          <label>Flexi 3 (comma separated)</label>
+          <input type="text" [ngModel]="form.flexi3?.join(',')"
+            (ngModelChange)="form.flexi3 = $event.split(',')" placeholder="value1,value2">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <lib-popup-loader *ngIf="saving" text="Saving"></lib-popup-loader>
+</div>

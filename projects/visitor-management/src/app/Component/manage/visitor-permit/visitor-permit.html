@@ -1,0 +1,385 @@
+<div class="permit-panel">
+  <div class="panel-header">
+    <div class="radio-tabs">
+      <label class="radio-tab" *ngFor="let status of statuses">
+        <input
+          type="radio"
+          name="visitorPermitStatusFilter"
+          [value]="status"
+          [checked]="activeStatus === status"
+          (change)="selectStatus(status)">
+        {{ statusLabels[status] }}
+      </label>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="table-wrap" *ngIf="!loading" (scroll)="closeActionMenu()">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Visitor Name</th>
+          <th>Email Id</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Phone Number</th>
+          <th>Visitor Company</th>
+          <th>Visit Reason</th>
+          <th>Visit Time</th>
+          <th>Department/Area To Visit</th>
+          <th>Host Person</th>
+          <th>Host Company</th>
+          <th>Host Person Email</th>
+          <th>Vehicle Name</th>
+          <th>Vehicle Id</th>
+          <th>Tools Name</th>
+          <th>Tools Quantity</th>
+          <th>Returnable</th>
+          <th>Remarks</th>
+          <th *ngIf="activeStatus === 'Approved'">Return Date&amp;Time</th>
+          <th>Authorization Code</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.contactName }}</td>
+          <td>{{ item.emailId }}</td>
+          <td>{{ item.fromDate ? (item.fromDate | date: 'mediumDate') : '-' }}</td>
+          <td>{{ item.toDate ? (item.toDate | date: 'mediumDate') : '-' }}</td>
+          <td>{{ item.phoneNo }}</td>
+          <td>{{ item.visitorCompany }}</td>
+          <td>{{ item.reasonOfVisit }}</td>
+          <td>{{ item.visitingTime }}</td>
+          <td>{{ item.zone || '-' }}</td>
+          <td>{{ item.hostPerson }}</td>
+          <td>{{ item.hostCompany }}</td>
+          <td>{{ item.hostPersonEmail }}</td>
+          <td>{{ item.vehicleName }}</td>
+          <td>{{ item.vehicleId }}</td>
+          <td class="align-top">
+            <div class="tool-lines">
+              <div *ngFor="let tool of item.toolDetails">{{ tool.toolsName || '-' }}</div>
+              <div *ngIf="!item.toolDetails.length">-</div>
+            </div>
+          </td>
+          <td class="align-top">
+            <div class="tool-lines">
+              <div *ngFor="let tool of item.toolDetails">{{ tool.toolsQuantity || '-' }}</div>
+              <div *ngIf="!item.toolDetails.length">-</div>
+            </div>
+          </td>
+          <td class="align-top">
+            <div class="tool-lines">
+              <div *ngFor="let tool of item.toolDetails">{{ (tool.returnable || '-') | titlecase }}</div>
+              <div *ngIf="!item.toolDetails.length">-</div>
+            </div>
+          </td>
+          <td class="align-top">
+            <div class="tool-lines">
+              <div *ngFor="let tool of item.toolDetails">{{ tool.remarks || '-' }}</div>
+              <div *ngIf="!item.toolDetails.length">-</div>
+            </div>
+          </td>
+          <td class="align-top" *ngIf="activeStatus === 'Approved'">
+            <div class="tool-lines">
+              <div *ngFor="let tool of item.toolDetails">{{ tool.modifiedAt ? (tool.modifiedAt | date: 'medium') : '-' }}</div>
+              <div *ngIf="!item.toolDetails.length">-</div>
+            </div>
+          </td>
+          <td>{{ item.authCode }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.pending]="item.status === 'Pending'"
+              [class.approved]="item.status === 'Approved' && !isPassClosed(item) && !isExpired(item)"
+              [class.expired]="item.status === 'Approved' && !isPassClosed(item) && isExpired(item)"
+              [class.closed]="item.status === 'Approved' && isPassClosed(item) && !isExpired(item)"
+              [class.closed-expired]="item.status === 'Approved' && isPassClosed(item) && isExpired(item)"
+              [class.rejected]="item.status === 'Rejected'">
+              {{ statusDisplay(item) }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button *ngIf="activeStatus === 'Approved' && !isPassClosed(item)" type="button" class="view-btn" (click)="toggleActionMenu(item, $event)">
+                <img [src]="visitorManagementUrl + '/assets/view.png'" alt="View">
+                <span>View</span>
+                <i class="ti ti-chevron-down"></i>
+              </button>
+              <button *ngIf="activeStatus !== 'Approved' || isPassClosed(item)" type="button" class="view-btn" (click)="view(item)">
+                <img [src]="visitorManagementUrl + '/assets/view.png'" alt="View">
+                <span>View</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="items.length === 0">
+          <td colspan="21" class="no-data">No {{ statusLabels[activeStatus].toLowerCase() }} visitor permits found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div
+    class="action-menu"
+    *ngIf="openActionItem"
+    [style.top.px]="menuPosition?.top"
+    [style.left.px]="menuPosition?.left"
+    (click)="$event.stopPropagation()">
+    <button type="button" (click)="viewData(openActionItem)">View Data</button>
+    <button type="button" (click)="openAssignAccess(openActionItem)">Assign Access</button>
+    <button type="button" *ngIf="!openActionItem.isEntered && !openActionItem.isExit" (click)="manualIn(openActionItem)">Manual In</button>
+    <button type="button" *ngIf="!openActionItem.isExit" (click)="manualOut(openActionItem)">Manual Out</button>
+  </div>
+
+  <div class="popup-overlay" *ngIf="selected" (click)="closeDetail()">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Visitor Gatepass Details</h3>
+        <button type="button" class="popup-close" (click)="closeDetail()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="detail-section">
+          <h4>Company details</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">Company Name</span><span class="detail-value">{{ selected.companyName || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Company Email</span><span class="detail-value">{{ selected.companyEmail || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Department Name</span><span class="detail-value">{{ selected.zone || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Contact Name</span><span class="detail-value">{{ selected.contactName || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Reason Of Visit</span><span class="detail-value">{{ selected.reasonOfVisit || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Start Date</span><span class="detail-value">{{ selected.fromDate ? (selected.fromDate | date: 'mediumDate') : '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">End Date</span><span class="detail-value">{{ selected.toDate ? (selected.toDate | date: 'mediumDate') : '-' }}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Visitor details</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">Full Name</span><span class="detail-value">{{ selected.contactName || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Mobile Number</span><span class="detail-value">{{ selected.mobileNo || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Department Name</span><span class="detail-value">{{ selected.zone || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Visiting Time</span><span class="detail-value">{{ selected.visitingTime || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Gatepass No</span><span class="detail-value">{{ selected.visitorPassReferenceNo || '-' }}</span></div>
+            <div class="detail-item">
+              <span class="detail-label">Status</span>
+              <span class="detail-value">
+                <span
+                  class="badge"
+                  [class.pending]="selected.status === 'Pending'"
+                  [class.approved]="selected.status === 'Approved' && !isPassClosed(selected) && !isExpired(selected)"
+                  [class.expired]="selected.status === 'Approved' && !isPassClosed(selected) && isExpired(selected)"
+                  [class.closed]="selected.status === 'Approved' && isPassClosed(selected) && !isExpired(selected)"
+                  [class.closed-expired]="selected.status === 'Approved' && isPassClosed(selected) && isExpired(selected)"
+                  [class.rejected]="selected.status === 'Rejected'">
+                  {{ statusDisplay(selected) }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Vehicle details</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">Vehicle Id</span><span class="detail-value">{{ selected.vehicleId || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Vehicle Name</span><span class="detail-value">{{ selected.vehicleName || '-' }}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="selected.visitorDocuments.length">
+          <h4>Documents</h4>
+          <div class="document-card" *ngFor="let doc of selected.visitorDocuments">
+            <div class="detail-grid">
+              <div class="detail-item"><span class="detail-label">Document Type</span><span class="detail-value">{{ doc.docType || '-' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Document Number</span><span class="detail-value">{{ doc.docNumber || '-' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Expires On</span><span class="detail-value">{{ doc.expiresOn || '-' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Uploads</span><span class="detail-value">{{ doc.upload || '-' }}</span></div>
+            </div>
+            <div class="document-image" *ngIf="doc.upload">
+              <span class="detail-label">Uploaded Image</span>
+              <img [src]="doc.upload" alt="Uploaded document">
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Access</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">Access Name</span><span class="detail-value">{{ joinAccess(selected) }}</span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4 class="section-heading">
+            Tool details
+            <button type="button" class="icon-btn" title="Add" *ngIf="activeStatus === 'Approved' && selected.toolDetails.length === 0" (click)="addTool()">
+              <i class="ti ti-plus"></i>
+            </button>
+          </h4>
+          <div class="table-wrap">
+            <table class="data-table tools-table">
+              <thead>
+                <tr>
+                  <th>Tools Name</th>
+                  <th>Serial No</th>
+                  <th>Tools Quantity</th>
+                  <th>Returnable</th>
+                  <th>Remarks</th>
+                  <th>Status</th>
+                  <th>Email</th>
+                  <th>timeStamp</th>
+                  <th *ngIf="activeStatus === 'Approved'">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let tool of selected.toolDetails; let i = index" [class.main-row]="tool.isMainRow">
+                  <td>{{ tool.toolsName }}</td>
+                  <td>{{ tool.serialNo }}</td>
+                  <td>
+                    <input *ngIf="editingToolIndex === i && toolDraft" type="text" [(ngModel)]="toolDraft!.toolsQuantity" placeholder="Quantity">
+                    <span *ngIf="editingToolIndex !== i">{{ tool.toolsQuantity }}</span>
+                  </td>
+                  <td>{{ tool.returnable | titlecase }}</td>
+                  <td>
+                    <input *ngIf="editingToolIndex === i && toolDraft" type="text" [(ngModel)]="toolDraft!.remarks" placeholder="Remarks">
+                    <span *ngIf="editingToolIndex !== i">{{ tool.remarks }}</span>
+                  </td>
+                  <td>{{ tool.toolStatus || '-' }}</td>
+                  <td>{{ tool.toolEmail || '-' }}</td>
+                  <td>{{ tool.modifiedAt ? (tool.modifiedAt | date: 'medium') : '-' }}</td>
+                  <td class="actions" *ngIf="activeStatus === 'Approved'">
+                    <div class="action-buttons">
+                      <ng-container *ngIf="editingToolIndex === i; else viewActions">
+                        <button type="button" class="icon-btn success" title="Save" (click)="saveTool()" [disabled]="savingTool">
+                          <i class="ti ti-check"></i>
+                        </button>
+                        <button type="button" class="icon-btn" title="Cancel" (click)="cancelToolEdit(i)" [disabled]="savingTool">
+                          <i class="ti ti-x"></i>
+                        </button>
+                      </ng-container>
+                      <ng-template #viewActions>
+                        <button type="button" class="icon-btn" title="Add" *ngIf="tool.isMainRow && tool.returnable.toLowerCase() === 'yes'" (click)="addTool(i)">
+                          <i class="ti ti-plus"></i>
+                        </button>
+                        <button type="button" class="icon-btn" title="Edit" (click)="editTool(i)">
+                          <i class="ti ti-pencil"></i>
+                        </button>
+                        <button type="button" class="icon-btn danger" title="Delete" *ngIf="!tool.isMainRow" (click)="deleteTool(i)">
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      </ng-template>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="selected.toolDetails.length === 0">
+                  <td [attr.colspan]="activeStatus === 'Approved' ? 9 : 8" class="no-data">No tool details found</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-grid">
+            <div class="detail-item"><span class="detail-label">Remarks</span><span class="detail-value">{{ selected.approvedRemarks || '-' }}</span></div>
+            <div class="detail-item"><span class="detail-label">Description</span><span class="detail-value">{{ selected.description || '-' }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button
+          type="button"
+          class="btn-close-pass"
+          *ngIf="selected.toolDetails[0]?.isClosedEnabled && selected.returnStatus !== 'Closed'"
+          [disabled]="closingPass"
+          (click)="closePass()">
+          {{ closingPass ? 'Closing...' : 'Close Pass' }}
+        </button>
+        <button type="button" class="btn-cancel" (click)="closeDetail()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showToolDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Delete this tool record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="cancelToolDelete()" [disabled]="deletingTool">Cancel</button>
+        <button type="button" class="btn-delete" (click)="confirmToolDelete()" [disabled]="deletingTool">
+          {{ deletingTool ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" *ngIf="showAssignAccess" (click)="closeAssignAccess()">
+    <div class="popup assign-access-popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Assign Access</h3>
+        <button type="button" class="popup-close" (click)="closeAssignAccess()">✕</button>
+      </div>
+
+      <div class="popup-body">
+        <div class="loading" *ngIf="loadingAssignAccess">Loading...</div>
+
+        <div class="detail-section" *ngIf="!loadingAssignAccess">
+          <div class="form-group">
+            <label>Reader</label>
+            <select [(ngModel)]="selectedReaderId" (ngModelChange)="addAssignAccessReader()" [disabled]="loadingReaders">
+              <option value="">{{ loadingReaders ? 'Loading readers...' : '-- Select Reader --' }}</option>
+              <option *ngFor="let device of readerDevices" [value]="device.uniqueId">
+                {{ device.mydeviceName }} - {{ device.uniqueId }}
+              </option>
+            </select>
+          </div>
+
+          <div class="chips" *ngIf="assignAccessList.length > 0">
+            <span class="chip reader-chip" *ngFor="let a of assignAccessList">
+              {{ a.accessName }} - {{ a.accessId }}
+              <button type="button" class="chip-remove" (click)="removeAssignAccessReader(a.accessId)">✕</button>
+            </span>
+          </div>
+          <div class="empty-hint" *ngIf="assignAccessList.length === 0">No access assigned yet</div>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button type="button" class="btn-save" [disabled]="savingAssignAccess || loadingAssignAccess" (click)="saveAssignAccess()">
+          {{ savingAssignAccess ? 'Saving...' : 'Save' }}
+        </button>
+        <button type="button" class="btn-cancel" [disabled]="savingAssignAccess" (click)="closeAssignAccess()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay confirm-overlay" *ngIf="showManualConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>{{ pendingManualAction?.kind === 'in' ? 'Confirm Manual In' : 'Confirm Manual Out' }}</h3>
+      </div>
+      <div class="popup-body">
+        <p>
+          {{ pendingManualAction?.kind === 'in'
+            ? 'Are you sure you want to allow manual in for this visitor?'
+            : 'Are you sure you want to allow manual out for this visitor?' }}
+        </p>
+      </div>
+      <div class="popup-footer">
+        <button type="button" class="btn-cancel" (click)="cancelManualStatus()" [disabled]="savingManualStatus">Cancel</button>
+        <button type="button" class="btn-save" (click)="confirmManualStatus()" [disabled]="savingManualStatus">
+          {{ savingManualStatus ? 'Processing...' : 'Confirm' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

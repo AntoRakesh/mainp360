@@ -1,0 +1,294 @@
+<div class="ac-container">
+  <!-- Top row -->
+  <div class="top-row">
+    <h2>{{ activeTab }}</h2>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search...">
+    </div>
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab === 'Groups'" (click)="setTab('Groups')">Groups</button>
+      <button class="tab" [class.active]="activeTab === 'Access'" (click)="setTab('Access')">Access</button>
+    </div>
+  </div>
+
+  <!-- Actions row -->
+  <div class="actions-row">
+    <button class="icon-btn" title="Add" (click)="openAdd()">
+      <img [src]="accessControlUrl + '/assets/icons/add.png'" alt="add">
+    </button>
+    <button class="icon-btn" title="Reload" (click)="loadAll()">
+      <img [src]="accessControlUrl + '/assets/icons/reload.png'" alt="reload">
+    </button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading...</div>
+  <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+  <!-- Groups tab -->
+  <div class="tab-content" *ngIf="activeTab === 'Groups' && !loading">
+    <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Group Name</th>
+          <th>Group Type</th>
+          <th>Members</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let g of filteredGroups; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ g.groupName }}</td>
+          <td>{{ g.groupType }}</td>
+          <td>{{ g.members.length || 0 }}</td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(g)">
+              <img [src]="accessControlUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(g.id!)">
+              <img [src]="accessControlUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredGroups.length === 0">
+          <td colspan="5" class="no-data">No groups found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Access tab -->
+  <div class="tab-content" *ngIf="activeTab === 'Access' && !loading">
+    <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Group Name</th>
+          <th>Group Type</th>
+          <th>Members</th>
+          <th>Readers</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of filteredAccess; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ a.groupName }}</td>
+          <td>{{ a.groupType }}</td>
+          <td>{{ a.members.length || 0 }}</td>
+          <td>{{ a.readers.length || 0 }}</td>
+          <td><span class="badge" [class.active]="a.status">{{ a.status ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="icon-btn small" title="Edit" (click)="openEdit(a)">
+              <img [src]="accessControlUrl + '/assets/icons/edit.png'" alt="edit">
+            </button>
+            <button class="icon-btn small danger" title="Delete" (click)="delete(a.id!)">
+              <img [src]="accessControlUrl + '/assets/icons/delete.png'" alt="delete">
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredAccess.length === 0">
+          <td colspan="7" class="no-data">No access records found</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>{{ isEdit ? 'Edit' : 'Add' }} {{ popupType === 'group' ? 'Group' : 'Access' }}</h3>
+        <button class="popup-close" (click)="closePopup()">✕</button>
+      </div>
+      <div class="popup-body">
+
+        <!-- ══ GROUP FORM ══ -->
+        <ng-container *ngIf="popupType === 'group'">
+
+          <!-- Radio row -->
+          <div class="radio-row">
+            <label class="radio-option">
+              <input type="radio" name="groupMemberType" value="Employee"
+                [(ngModel)]="groupMemberType" (ngModelChange)="onGroupMemberTypeChange()"> Employee
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="groupMemberType" value="Contractor"
+                [(ngModel)]="groupMemberType" (ngModelChange)="onGroupMemberTypeChange()"> Contractor
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="groupMemberType" value="Visitor"
+                [(ngModel)]="groupMemberType" (ngModelChange)="onGroupMemberTypeChange()"> Visitor
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Group Name</label>
+            <input type="text" [(ngModel)]="groupForm.groupName" placeholder="Enter group name">
+          </div>
+
+          <div class="form-group">
+            <label>Group Members</label>
+            <select [(ngModel)]="selectedGroupMember" (ngModelChange)="addGroupMember()">
+              <option value="">-- Select Member --</option>
+              <option *ngFor="let m of getMemberOptions(groupMemberType)" [value]="m.id">
+                {{ m.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Selected members chips -->
+          <div class="chips" *ngIf="groupForm.members.length > 0">
+            <span class="chip" *ngFor="let m of groupForm.members">
+              {{ getMemberLabel(m) }}
+              <button class="chip-remove" (click)="removeGroupMember(m)">✕</button>
+            </span>
+          </div>
+
+        </ng-container>
+
+        <!-- ══ ACCESS FORM ══ -->
+        <ng-container *ngIf="popupType === 'access'">
+
+          <!-- Radio row -->
+          <div class="radio-row">
+            <label class="radio-option">
+              <input type="radio" name="accessMemberType" value="Employee"
+                [(ngModel)]="accessMemberType" (ngModelChange)="onAccessMemberTypeChange()"> Employee
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="accessMemberType" value="Contractor"
+                [(ngModel)]="accessMemberType" (ngModelChange)="onAccessMemberTypeChange()"> Contractor
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="accessMemberType" value="Visitor"
+                [(ngModel)]="accessMemberType" (ngModelChange)="onAccessMemberTypeChange()"> Visitor
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Group Name</label>
+            <input type="text" [(ngModel)]="accessForm.groupName" placeholder="Enter group name">
+          </div>
+
+          <div class="form-group">
+            <label>Group Members</label>
+            <select [(ngModel)]="selectedAccessMember" (ngModelChange)="addAccessMember()">
+              <option value="">-- Select Member --</option>
+              <option *ngFor="let m of getMemberOptions(accessMemberType)" [value]="m.id">
+                {{ m.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="chips" *ngIf="accessForm.members.length > 0">
+            <span class="chip" *ngFor="let m of accessForm.members">
+              {{ getMemberLabel(m) }}
+              <button class="chip-remove" (click)="removeAccessMember(m)">✕</button>
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Readers</label>
+            <select [(ngModel)]="selectedReader" (ngModelChange)="addReader()">
+              <option value="">-- Select Reader --</option>
+              <option *ngFor="let r of readers" [value]="r.id">
+                {{ r.type }} ({{ r.uniqueId }})
+              </option>
+            </select>
+          </div>
+
+          <div class="chips" *ngIf="accessForm.readers.length > 0">
+            <span class="chip reader-chip" *ngFor="let r of accessForm.readers">
+              {{ getReaderLabel(r) }}
+              <button class="chip-remove" (click)="removeReader(r)">✕</button>
+            </span>
+          </div>
+
+          <!-- Status toggle -->
+          <div class="toggle-row">
+            <span class="toggle-label">Status</span>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="accessForm.status">
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-state">{{ accessForm.status ? 'Active' : 'Inactive' }}</span>
+          </div>
+
+          <!-- Time Schedule -->
+          <div class="schedule-header">
+            <span class="schedule-title">Time Schedule (24hr)</span>
+            <button class="icon-btn small" title="Add Schedule" (click)="addSchedule()">
+              <i class="ti ti-plus"></i>
+            </button>
+          </div>
+
+          <div class="schedule-block" *ngFor="let sch of schedules; let i = index">
+            <div class="schedule-block-header">
+              <span>Schedule {{ i + 1 }}</span>
+              <button class="chip-remove" *ngIf="schedules.length > 1" (click)="removeSchedule(i)">✕</button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Date</label>
+                <input type="date" [(ngModel)]="sch.fromDate">
+              </div>
+              <div class="form-group">
+                <label>To Date</label>
+                <input type="date" [(ngModel)]="sch.toDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>From Time</label>
+                <input type="time" [(ngModel)]="sch.fromTime">
+              </div>
+              <div class="form-group">
+                <label>To Time</label>
+                <input type="time" [(ngModel)]="sch.toTime">
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="closePopup()">Cancel</button>
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="saving" [text]="isEdit ? 'Saving' : 'Creating'"></lib-popup-loader>
+    </div>
+  </div>
+
+  <!-- Delete confirmation popup -->
+  <div class="popup-overlay confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="popup confirm-popup">
+      <div class="popup-header">
+        <h3>Confirm Delete</h3>
+      </div>
+      <div class="popup-body">
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-cancel" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="deleting">
+          {{ deleting ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+
+      <lib-popup-loader *ngIf="deleting" text="Deleting"></lib-popup-loader>
+    </div>
+  </div>
+
+</div>
